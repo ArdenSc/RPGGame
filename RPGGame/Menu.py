@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import List
-from os import get_terminal_size, path, system
+from os import get_terminal_size, system
 
 
 class Menu:
@@ -18,7 +18,7 @@ class Menu:
             map: An array of strings with each line of the map/image.
             leftPadding: Amount of spaces on the left of the menu.
             middlePadding: Amount of spaces between the menu and map/image.
-            rightPAdding: Amount of spaces on the right of the map/image.
+            rightPadding: Amount of spaces on the right of the map/image.
         """
         self.leftPadding = leftPadding
         self.middlePadding = middlePadding
@@ -30,6 +30,7 @@ class Menu:
         self.map = [line + ' ' * (self.mapColumns - len(line)) for line in map]
 
     def waitForInput(self: Menu, options: List[str]) -> int:
+        options = [f"{i+1}. {v}" for i, v in enumerate(options)]
         maxOption = len(options) + 1
         out: str = ""
         maxOptionLength = (self.termSize.columns - self.mapColumns -
@@ -62,12 +63,3 @@ class Menu:
                 system('cls')
                 return int(response)
             message = "Sorry, please choose a valid number"
-
-
-if __name__ == "__main__":
-    menu = None
-    with open(path.join(path.dirname(__file__), 'assets/worldmap.txt'),
-              'r') as mapFile:
-        menu = Menu(map=mapFile.readlines())
-    menu.waitForInput(["1. North", "2. East", "3. South", "4. West"])
-    print("Corrent Answer Entered.")
