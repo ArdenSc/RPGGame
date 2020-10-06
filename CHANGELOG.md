@@ -35,6 +35,6 @@ Includes all important changes to the RPG adventure game.
 - Python setup file for module info and installation.
 
 [unreleased]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.3...HEAD
-[0.0.3]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.2..v0.0.3
+[0.0.3]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/ArdenSinclair/RPGGame/releases/tag/v0.0.1
