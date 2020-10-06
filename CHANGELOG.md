@@ -23,7 +23,7 @@ Includes all important changes to the RPG adventure game.
 
 ### Changed
 
-- File structure revised to support installation method listeed in readme.
+- File structure revised to support installation method listed in readme.
 - Setup file now includes more information.
 
 ## [0.0.1] - Prerelease - 2020-09-21
