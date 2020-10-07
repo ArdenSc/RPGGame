@@ -1,7 +1,6 @@
 from os import path, system
 from .GameState import GameState
 from .Menu import Menu
-from .strings.consoleAlign import *
 
 
 class GameWindow:
@@ -14,15 +13,62 @@ class GameWindow:
 
     def run(self):
         self.terminalResize(135, 35)
-        map = open(
+        menu = Menu()
+        handler = open(
             path.join(path.dirname(__file__), 'assets', 'mapplaceholder.txt'))
-        menu = Menu(map=map.readlines())
-        map.close()
+        map = handler.readlines()
+        handler.close()
         while True:
-            if menu.waitForInput([
-                    "Placeholder",
-                    "Placeholder",
-                    "Placeholder",
+            selection = menu.optionSelector(map, [
+                "Tunnel",
+                "Cave",
+                "Hill",
+                "Quit",
+            ])
+            if selection == 0:
+                selection = menu.optionSelector(map, [
+                    "Left Tunnel",
+                    "Middle Tunnel",
+                    "Right Tunnel",
                     "Quit",
-            ]) == 4:
-                break
+                ])
+                if selection == 0:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 1:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 2:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 3:
+                    quit()
+            elif selection == 1:
+                selection = menu.optionSelector(map, [
+                    "Left Cave",
+                    "Middle Cave",
+                    "Right Cave",
+                    "Quit",
+                ])
+                if selection == 0:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 1:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 2:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 3:
+                    quit()
+            elif selection == 2:
+                selection = menu.optionSelector(map, [
+                    "Left Hill",
+                    "Middle Hill",
+                    "Right Hill",
+                    "Quit",
+                ])
+                if selection == 0:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 1:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 2:
+                    menu.optionSelector(map, ["No further options"])
+                elif selection == 3:
+                    quit()
+            elif selection == 3:
+                quit()

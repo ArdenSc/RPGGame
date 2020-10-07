@@ -1,8 +1,0 @@
-STRING_RESIZE_NEEDED = "Your console window needs to be resized to play this game. Lets fix that."
-STRING_WIDTH_INCORRECT = "{} the width of your console window slowly until this message changes."
-STRING_WIDTH_CORRECT = "Great! Now leave the window in this position for 2 seconds to continue."
-STRING_WIDTH_DONE = "Perfect! The width of the window is correct. Please do not adjust it for the rest of the game."
-STRING_HEIGHT_INCORRECT = "Increase the height of your console window slowly until this message changes."
-STRING_HEIGHT_SKIPPABLE = "The height of the console window needs to be decreased, but you can skip this step by pressing 's'"
-STRING_HEIGHT_CORRECT = "Great! Now leave the window in this position for 2 seconds to continue."
-STRING_HEIGHT_DONE = "Perfect! The height of the window is valid. Please do not adjust it for the rest of the game."

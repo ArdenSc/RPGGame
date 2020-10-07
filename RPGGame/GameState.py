@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Dict, List
+from typing import Callable, Dict, Generic, List, TypeVar
 from typing_extensions import TypedDict
 
 
@@ -8,11 +8,43 @@ class Behavior(TypedDict):
     function: Callable[[], None]
 
 
+T = TypeVar('T')
+
+
+class Vector(Generic[T]):
+    values: List[T]
+
+    def __init__(self, *args: T):
+        self.values = list(args)
+
+    def __str__(self) -> str:
+        return "(" + ', '.join(self.values) + ")"
+
+    def __len__(self) -> T:
+        return len(self.values)
+
+    def __getitem__(self, index: int) -> T:
+        return self.values[index]
+
+    def __add__(self, other: Vector[T]) -> Vector[T]:
+        if len(self) != len(other):
+            raise ValueError("Vectors are not the same length.")
+        return Vector(*[self[i] + other[i] for i in range(len(self))])
+
+    def __sub__(self, other: Vector[T]) -> Vector[T]:
+        if len(self) != len(other):
+            raise ValueError("Vectors are not the same length.")
+        return Vector(*[self[i] - other[i] for i in range(len(self))])
+
+
 class GameState:
     # Bindings to all menu and behavior functions
-    _call: Dict[str, Callable[[], None]] = {}
+    _call: Dict[str, Callable[[], None]]
+    _mapSegment: int
+    playerPos: Vector[int]
 
     def __init__(self):
+        self._call = {}
         # TODO: Add needed parameters to GameState constructor
         pass
 
@@ -42,3 +74,6 @@ class GameState:
         for behavior in behaviors:
             self.registerBehavior(behavior)
         return self
+
+    def movePlayer(self, movement: Vector[int]):
+        self.playerPos = self.playerPos + movement
