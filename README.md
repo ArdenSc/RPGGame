@@ -15,7 +15,7 @@ Clone the repository and install it with pip
 ```cmd
 git clone https://github.com/ArdenSinclair/RPGGame.git
 cd RPGGame
-pip install .
+pip install --user .
 ```
 
 ## Usage
