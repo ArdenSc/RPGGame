@@ -1,4 +1,5 @@
 # RPGGame
+
 ![GitHub top language](https://img.shields.io/github/languages/top/ArdenSinclair/RPGGame?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/ArdenSinclair/RPGGame?style=flat-square)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/ArdenSinclair/RPGGame?include_prereleases&style=flat-square)
@@ -13,7 +14,8 @@ Clone the repository and install it with pip
 
 ```cmd
 git clone https://github.com/ArdenSinclair/RPGGame.git
-pip install ./RPGGame
+cd RPGGame
+pip install .
 ```
 
 ## Usage
@@ -23,4 +25,5 @@ python -m RPGGame
 ```
 
 ## License
+
 [GPL-3.0](https://github.com/ArdenSinclair/RPGGame/blob/master/LICENSE)
