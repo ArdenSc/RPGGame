@@ -1,4 +1,5 @@
 from os import path, system
+from sys import platform
 from .GameState import GameState
 from .Menu import Menu
 
@@ -9,7 +10,10 @@ class GameWindow:
 
     @staticmethod
     def terminalResize(columns: int, lines: int):
-        system(f"mode con: cols={columns} lines={lines}")
+        if platform == 'win32':
+            system(f"mode con: cols={columns} lines={lines}")
+        else:
+            system(f"resize -s {columns} {lines}")
 
     def run(self):
         self.terminalResize(135, 35)

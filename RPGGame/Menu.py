@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import List
 from os import get_terminal_size, system
-from msvcrt import kbhit, getch
-from sys import platform
+from .KeyPress import GetKeyPress
 
 
 class Menu:
@@ -23,6 +22,7 @@ class Menu:
         self.leftPadding = leftPadding
         self.middlePadding = middlePadding
         self.rightPadding = rightPadding
+        self.getKeyPress = GetKeyPress()
 
     @staticmethod
     def fixmaplol(map: List[str]) -> List[str]:
@@ -38,32 +38,45 @@ class Menu:
                  clockwise around a compass. Additionally, 4 may be returned
                  and the program should quit.
         """
-        if platform != "win32":
-            raise Exception("Following code unimplemented for non-win32 OSes.")
         while True:
-            if kbhit():
-                key = getch()
-                if key == b'\xe0':
-                    key = getch()
-                    if key == b'H':
-                        return 0
-                    elif key == b'M':
-                        return 1
-                    elif key == b'P':
-                        return 2
-                    elif key == b'K':
-                        return 3
-                elif key in [b'w', b'a', b's', b'd', b'q']:
-                    if key == b'w':
-                        return 0
-                    elif key == b'd':
-                        return 1
-                    elif key == b's':
-                        return 2
-                    elif key == b'a':
-                        return 3
-                    elif key == b'q':
-                        return 4
+            ch = self.getKeyPress()
+            if ch:
+                if ch == 'w':
+                    return 0
+                elif ch == 'd':
+                    return 1
+                elif ch == 's':
+                    return 2
+                elif ch == 'a':
+                    return 3
+                elif ch == 'q':
+                    return 4
+        # if platform != "win32":
+        #     raise Exception("Following code unimplemented for non-win32 OSes.")
+        # while True:
+        #     if kbhit():
+        #         key = getch()
+        #         if key == b'\xe0':
+        #             key = getch()
+        #             if key == b'H':
+        #                 return 0
+        #             elif key == b'M':
+        #                 return 1
+        #             elif key == b'P':
+        #                 return 2
+        #             elif key == b'K':
+        #                 return 3
+        #         elif key in [b'w', b'a', b's', b'd', b'q']:
+        #             if key == b'w':
+        #                 return 0
+        #             elif key == b'd':
+        #                 return 1
+        #             elif key == b's':
+        #                 return 2
+        #             elif key == b'a':
+        #                 return 3
+        #             elif key == b'q':
+        #                 return 4
 
     def optionSelector(self, map: List[str], options: List[str]) -> int:
         termSize = get_terminal_size()
