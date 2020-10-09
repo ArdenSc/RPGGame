@@ -27,7 +27,7 @@ class Menu:
     @staticmethod
     def uniformLineLengths(map: List[List[str]]) -> List[List[str]]:
         columns = len(max(map, key=len))
-        return [line + [' ' * (columns - len(line))] for line in map]
+        return [line + [' '] * (columns - len(line)) for line in map]
 
     def navigation(self) -> int:
         """Waits for a navigational key to be pressed.
