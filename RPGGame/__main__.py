@@ -4,9 +4,11 @@
 # An interactive adventure game.
 # Currently only example code is implemented.
 
-from .GameState import GameState
-from .GameWindow import GameWindow
+from RPGGame.maps import maps
+from RPGGame.GameState import GameState
+from RPGGame.GameWindow import GameWindow
 
 if __name__ == "__main__":
     window = GameWindow(GameState())
+    window.addMaps(maps)
     window.run()

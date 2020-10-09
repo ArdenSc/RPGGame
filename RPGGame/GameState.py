@@ -40,18 +40,19 @@ class Vector(Generic[T]):
 class GameState:
     # Bindings to all menu and behavior functions
     _call: Dict[str, Callable[[], None]]
-    _mapSegment: int
+    _mapSegment: Vector[int]
     playerPos: Vector[int]
 
     def __init__(self):
         self._call = {}
+        self._mapSegment = Vector(0, 0)
         # TODO: Add needed parameters to GameState constructor
         pass
 
     def __call__(self, key: str) -> None:
         return self._call[key]()
 
-    def registerBehavior(self, behavior: Behavior) -> GameState:
+    def registerItem(self, behavior: Behavior) -> GameState:
         """Registers a menu or behavior to the game to be used in the map.
 
         Args:
@@ -63,7 +64,7 @@ class GameState:
         self._call[behavior["key"]] = behavior["function"]
         return self
 
-    def registerBehaviors(self, behaviors: List[Behavior]) -> GameState:
+    def registerItems(self, behaviors: List[Behavior]) -> GameState:
         """Registers multiple menus and/or behaviors for use in the game.
 
         Args:
@@ -72,7 +73,7 @@ class GameState:
             The class instance the method was called on.
         """
         for behavior in behaviors:
-            self.registerBehavior(behavior)
+            self.registerItem(behavior)
         return self
 
     def movePlayer(self, movement: Vector[int]):

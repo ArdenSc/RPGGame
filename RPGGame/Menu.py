@@ -1,7 +1,7 @@
 from __future__ import annotations
+from RPGGame.KeyPress import GetKeyPress
 from typing import List
 from os import get_terminal_size, system
-from .KeyPress import GetKeyPress
 
 
 class Menu:
@@ -25,10 +25,9 @@ class Menu:
         self.getKeyPress = GetKeyPress()
 
     @staticmethod
-    def fixmaplol(map: List[str]) -> List[str]:
-        map = [line.rstrip('\n') for line in map]
+    def uniformLineLengths(map: List[List[str]]) -> List[List[str]]:
         columns = len(max(map, key=len))
-        return [line + ' ' * (columns - len(line)) for line in map]
+        return [line + [' ' * (columns - len(line))] for line in map]
 
     def navigation(self) -> int:
         """Waits for a navigational key to be pressed.
@@ -51,36 +50,10 @@ class Menu:
                     return 3
                 elif ch == 'q':
                     return 4
-        # if platform != "win32":
-        #     raise Exception("Following code unimplemented for non-win32 OSes.")
-        # while True:
-        #     if kbhit():
-        #         key = getch()
-        #         if key == b'\xe0':
-        #             key = getch()
-        #             if key == b'H':
-        #                 return 0
-        #             elif key == b'M':
-        #                 return 1
-        #             elif key == b'P':
-        #                 return 2
-        #             elif key == b'K':
-        #                 return 3
-        #         elif key in [b'w', b'a', b's', b'd', b'q']:
-        #             if key == b'w':
-        #                 return 0
-        #             elif key == b'd':
-        #                 return 1
-        #             elif key == b's':
-        #                 return 2
-        #             elif key == b'a':
-        #                 return 3
-        #             elif key == b'q':
-        #                 return 4
 
-    def optionSelector(self, map: List[str], options: List[str]) -> int:
+    def optionSelector(self, map: List[List[str]], options: List[str]) -> int:
         termSize = get_terminal_size()
-        map = self.fixmaplol(map)
+        map = self.uniformLineLengths(map)
         mapColumns = len(map[0])
         options = [f"{i+1}. {v}" for i, v in enumerate(options)]
         maxOption = len(options) + 1
@@ -99,7 +72,7 @@ class Menu:
             else:
                 out += ' ' * (maxOptionLength)
             out += ' ' * (self.middlePadding)
-            out += '\u2502' + line + '\u2502'
+            out += '\u2502' + ''.join(line) + '\u2502'
             out += ' ' * (self.rightPadding)
         out += ' ' * (self.leftPadding + maxOptionLength + self.middlePadding)
         out += '\u2514' + '\u2500' * mapColumns + '\u2518'

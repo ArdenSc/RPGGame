@@ -1,10 +1,16 @@
-from os import path, system
+from __future__ import annotations
+from typing import List
+from RPGGame.MapSegment import MapSegment
+from RPGGame.Menu import Menu
+from RPGGame.GameState import GameState
+from os import system
 from sys import platform
-from .GameState import GameState
-from .Menu import Menu
 
 
 class GameWindow:
+    _state: GameState
+    _map: List[List[MapSegment]]
+
     def __init__(self, state: GameState):
         self._state = state
 
@@ -15,13 +21,14 @@ class GameWindow:
         else:
             system(f"resize -s {columns} {lines}")
 
+    def addMaps(self, map: List[List[MapSegment]]) -> GameWindow:
+        self._map = map
+        return self
+
     def run(self):
         self.terminalResize(135, 35)
         menu = Menu()
-        handler = open(
-            path.join(path.dirname(__file__), 'assets', 'mapplaceholder.txt'))
-        map = handler.readlines()
-        handler.close()
+        map = self._map[0][0].map
         while True:
             selection = menu.optionSelector(map, [
                 "Tunnel",
