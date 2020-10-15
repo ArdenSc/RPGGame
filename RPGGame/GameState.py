@@ -18,7 +18,7 @@ class Vector(Generic[T]):
         self.values = list(args)
 
     def __str__(self) -> str:
-        return "(" + ', '.join(self.values) + ")"
+        return "(" + ', '.join(map(str, self.values)) + ")"
 
     def __len__(self) -> T:
         return len(self.values)
@@ -46,6 +46,7 @@ class GameState:
     def __init__(self):
         self._call = {}
         self._mapSegment = Vector(0, 0)
+        self.playerPos = Vector(0, 0)
         # TODO: Add needed parameters to GameState constructor
         pass
 

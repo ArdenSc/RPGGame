@@ -1,7 +1,16 @@
 from __future__ import annotations
+from RPGGame.GameState import Vector
+from RPGGame.MapSegment import MapSegment
 from RPGGame.KeyPress import GetKeyPress
-from typing import List
+from typing import Callable, List
 from os import get_terminal_size, system
+from typing_extensions import TypedDict
+from copy import deepcopy
+
+
+class ScreenSegment(TypedDict):
+    lines: int
+    getLine: Callable[[int], str]
 
 
 class Menu:
@@ -29,14 +38,50 @@ class Menu:
         columns = len(max(map, key=len))
         return [line + [' '] * (columns - len(line)) for line in map]
 
-    def navigation(self) -> int:
+    def navigation(self, map: MapSegment, player_position: Vector[int]) -> int:
         """Waits for a navigational key to be pressed.
 
         Returns
             int: one of 0-3 where 0 is North and each successive number is
                  clockwise around a compass. Additionally, 4 may be returned
-                 and the program should quit.
+                 and logic should follow that quits the program.
         """
+        # termSize = get_terminal_size()
+        # t_width, t_height = termSize.columns, termSize.lines
+
+        display_lines = []
+
+        map_copy = deepcopy(map.map)
+        map_copy[player_position[1]][player_position[0]] = "O"
+
+        def spacer(i: int) -> str:
+            return ""
+
+        def right_map(i: int) -> str:
+            return ''.join(map_copy[i])
+
+        segments: List[ScreenSegment] = [
+            {
+                "lines": 5,
+                "getLine": spacer,
+            },
+            {
+                "lines": len(map_copy),
+                "getLine": right_map,
+            },
+            {
+                "lines": 1,
+                "getLine": spacer,
+            },
+        ]
+
+        for segment in segments:
+            for i in range(segment["lines"]):
+                display_lines.append(segment["getLine"](i))
+
+        system('cls')
+        print('\n'.join(display_lines), end="")
+
         while True:
             ch = self.getKeyPress()
             if ch:

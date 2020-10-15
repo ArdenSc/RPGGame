@@ -27,6 +27,12 @@ def rearranageList(list: List[T], columns: int) -> List[List[T]]:
     return [list[i:i + columns] for i in range(0, len(list), columns)]
 
 
+def uniformLineLengths(list: List[List[str]], columns: int) -> List[List[str]]:
+    print(f"ull {list}")
+    print(f"ull {columns}")
+    return [x + [' '] * (columns - len(x)) for x in list]
+
+
 # Maps
 
 _maps = list(filter(lambda x: search("^\\d{2}.txt$", x), files))
@@ -39,6 +45,9 @@ _maps.sort(key=lambda x: int(x[:2]))
 _maps = list(map(nameToFileLines, _maps))
 _maps = list(map(stripNewlines, _maps))
 _maps = list(map(linesToCharLists, _maps))
+_maps = list(
+    map(lambda x: uniformLineLengths(x, len(max(x, key=len, default=[]))),
+        _maps))
 _maps = rearranageList(_maps, mapGridSize)
 maps = []
 for ir, row in enumerate(_maps):
@@ -46,25 +55,24 @@ for ir, row in enumerate(_maps):
     for ic, column in enumerate(row):
         maps[ir].append(MapSegment(column))
 
-
 # Hitboxes
 
-map_hitbox_files = list(
-    filter(lambda x: search("^\\d{2}hitbox.txt$", x), files))
-map_hitbox_files.sort(key=lambda x: int(x[:2]))
+# map_hitbox_files = list(
+#     filter(lambda x: search("^\\d{2}hitbox.txt$", x), files))
+# map_hitbox_files.sort(key=lambda x: int(x[:2]))
 
-hitboxlist = []
+# hitboxlist = []
 
-if len(map_hitbox_files) != isqrt(len(map_hitbox_files))**2:
-    raise Exception("Amount of hitbox files in maps must be a perfect square.")
+# if len(map_hitbox_files) != isqrt(len(map_hitbox_files))**2:
+#     raise Exception("Amount of hitbox files in maps must be a perfect square.")
 
-for filename in map_hitbox_files:
-    with open(path.join(path.dirname(__file__), filename)) as file:
-        hitboxlist.append(file.read())
+# for filename in map_hitbox_files:
+#     with open(path.join(path.dirname(__file__), filename)) as file:
+#         hitboxlist.append(file.read())
 
-hitboxes = []
-hitboxwidth = isqrt(len(hitboxlist))
+# hitboxes = []
+# hitboxwidth = isqrt(len(hitboxlist))
 
-for i in range(hitboxwidth):
-    hitboxes.append(hitboxlist[:hitboxwidth])
-    hitboxlist = hitboxlist[hitboxwidth:]
+# for i in range(hitboxwidth):
+#     hitboxes.append(hitboxlist[:hitboxwidth])
+#     hitboxlist = hitboxlist[hitboxwidth:]
