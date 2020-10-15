@@ -32,13 +32,13 @@ class GameWindow:
         while True:
             direction = menu.navigation(map, self._state.playerPos)
             if direction == 0:
-                self._state.playerPos += Vector(0, -1)
+                self._state.playerPos += Vector.North()
             elif direction == 1:
-                self._state.playerPos += Vector(1, 0)
+                self._state.playerPos += Vector.East()
             elif direction == 2:
-                self._state.playerPos += Vector(0, 1)
+                self._state.playerPos += Vector.South()
             elif direction == 3:
-                self._state.playerPos += Vector(-1, 0)
+                self._state.playerPos += Vector.West()
             elif direction == 4:
                 break
 

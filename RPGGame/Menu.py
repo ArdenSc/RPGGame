@@ -38,7 +38,7 @@ class Menu:
         columns = len(max(map, key=len))
         return [line + [' '] * (columns - len(line)) for line in map]
 
-    def navigation(self, map: MapSegment, player_position: Vector[int]) -> int:
+    def navigation(self, map: MapSegment, player_position: Vector) -> int:
         """Waits for a navigational key to be pressed.
 
         Returns
@@ -56,6 +56,13 @@ class Menu:
 
         def spacer(i: int) -> str:
             return ""
+
+        def dynamic_spacer(i: int, width: int, *strings: str) -> str:
+            extra_space = width
+            for string in strings:
+                extra_space -= len(string)
+            spacer = ' ' * (extra_space // (len(strings) - 1))
+            return spacer.join(strings)
 
         def right_map(i: int) -> str:
             return ''.join(map_copy[i])

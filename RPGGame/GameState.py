@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Dict, Generic, List, TypeVar
+from typing import Callable, Dict, List
 from typing_extensions import TypedDict
 
 
@@ -7,31 +7,43 @@ class Behavior(TypedDict):
     key: str
     function: Callable[[], None]
 
+class Vector:
+    values: List[int]
 
-T = TypeVar('T')
+    @staticmethod
+    def North():
+        return Vector(0, -1)
 
+    @staticmethod
+    def East():
+        return Vector(1, 0)
 
-class Vector(Generic[T]):
-    values: List[T]
+    @staticmethod
+    def South():
+        return Vector(0, 1)
 
-    def __init__(self, *args: T):
+    @staticmethod
+    def West():
+        return Vector(-1, 0)
+
+    def __init__(self, *args: int):
         self.values = list(args)
 
     def __str__(self) -> str:
         return "(" + ', '.join(map(str, self.values)) + ")"
 
-    def __len__(self) -> T:
+    def __len__(self) -> int:
         return len(self.values)
 
-    def __getitem__(self, index: int) -> T:
+    def __getitem__(self, index: int) -> int:
         return self.values[index]
 
-    def __add__(self, other: Vector[T]) -> Vector[T]:
+    def __add__(self, other: Vector) -> Vector:
         if len(self) != len(other):
             raise ValueError("Vectors are not the same length.")
         return Vector(*[self[i] + other[i] for i in range(len(self))])
 
-    def __sub__(self, other: Vector[T]) -> Vector[T]:
+    def __sub__(self, other: Vector) -> Vector:
         if len(self) != len(other):
             raise ValueError("Vectors are not the same length.")
         return Vector(*[self[i] - other[i] for i in range(len(self))])
@@ -40,8 +52,8 @@ class Vector(Generic[T]):
 class GameState:
     # Bindings to all menu and behavior functions
     _call: Dict[str, Callable[[], None]]
-    _mapSegment: Vector[int]
-    playerPos: Vector[int]
+    _mapSegment: Vector
+    playerPos: Vector
 
     def __init__(self):
         self._call = {}
@@ -77,5 +89,5 @@ class GameState:
             self.registerItem(behavior)
         return self
 
-    def movePlayer(self, movement: Vector[int]):
+    def movePlayer(self, movement: Vector):
         self.playerPos = self.playerPos + movement
