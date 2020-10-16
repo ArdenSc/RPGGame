@@ -28,8 +28,6 @@ def rearranageList(list: List[T], columns: int) -> List[List[T]]:
 
 
 def uniformLineLengths(list: List[List[str]], columns: int) -> List[List[str]]:
-    print(f"ull {list}")
-    print(f"ull {columns}")
     return [x + [' '] * (columns - len(x)) for x in list]
 
 

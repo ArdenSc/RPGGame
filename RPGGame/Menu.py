@@ -2,35 +2,27 @@ from __future__ import annotations
 from RPGGame.GameState import Vector
 from RPGGame.MapSegment import MapSegment
 from RPGGame.KeyPress import GetKeyPress
-from typing import Callable, List
+from typing import Callable, List, Union
 from os import get_terminal_size, system
-from typing_extensions import TypedDict
 from copy import deepcopy
-
-
-class ScreenSegment(TypedDict):
-    lines: int
-    getLine: Callable[[int], str]
+from functools import partial
 
 
 class Menu:
     def __init__(
         self,
-        leftPadding: int = 10,
+        horizontalPad: int = 10,
         middlePadding: int = 10,
-        rightPadding: int = 10,
     ) -> None:
         """Displays a well-formatted menu.
         See method docstrings for more details.
 
         Args:
-            leftPadding: Amount of spaces on the left of the menu.
+            horizontalPad: Amount of spaces on the left and right of the menu.
             middlePadding: Amount of spaces between the menu and map/image.
-            rightPadding: Amount of spaces on the right of the map/image.
         """
-        self.leftPadding = leftPadding
+        self.horizontalPad = horizontalPad
         self.middlePadding = middlePadding
-        self.rightPadding = rightPadding
         self.getKeyPress = GetKeyPress()
 
     @staticmethod
@@ -38,7 +30,7 @@ class Menu:
         columns = len(max(map, key=len))
         return [line + [' '] * (columns - len(line)) for line in map]
 
-    def navigation(self, map: MapSegment, player_position: Vector) -> int:
+    def navigation(self, game_map: MapSegment, player_position: Vector) -> int:
         """Waits for a navigational key to be pressed.
 
         Returns
@@ -46,45 +38,58 @@ class Menu:
                  clockwise around a compass. Additionally, 4 may be returned
                  and logic should follow that quits the program.
         """
-        # termSize = get_terminal_size()
-        # t_width, t_height = termSize.columns, termSize.lines
+        width = get_terminal_size().columns - self.horizontalPad * 2
 
         display_lines = []
 
-        map_copy = deepcopy(map.map)
-        map_copy[player_position[1]][player_position[0]] = "O"
+        map_copy = deepcopy(game_map.map)
+        x, y = player_position
+        map_copy[y][x] = "O"
 
         def spacer(i: int) -> str:
             return ""
 
-        def dynamic_spacer(i: int, width: int, *strings: str) -> str:
+        def dist_horizontal(args: List[Union[str, Callable[[int], str]]],
+                            i: int) -> str:
             extra_space = width
+            strings = [arg(i) if callable(arg) else arg for arg in args]
             for string in strings:
                 extra_space -= len(string)
-            spacer = ' ' * (extra_space // (len(strings) - 1))
+            spacer = ' ' * (extra_space // (len(args) - 1))
             return spacer.join(strings)
 
-        def right_map(i: int) -> str:
+        def map(i: int) -> str:
             return ''.join(map_copy[i])
 
-        segments: List[ScreenSegment] = [
-            {
-                "lines": 5,
-                "getLine": spacer,
-            },
-            {
-                "lines": len(map_copy),
-                "getLine": right_map,
-            },
-            {
-                "lines": 1,
-                "getLine": spacer,
-            },
+        def nav_info(i: int) -> str:
+            menu = [
+                "              ",
+                "              ",
+                "              ",
+                "              ",
+                "              ",
+                "              ",
+                "              ",
+                "  W ---- Up   ",
+                "A S D -- Right",
+                " \\ \\---- Down ",
+                "  \\----- Left ",
+                "  Q ---- Quit ",
+            ]
+            try:
+                return menu[i]
+            except IndexError:
+                return menu[0]
+
+        segments = [
+            (5, spacer),
+            (len(map_copy), partial(dist_horizontal, [nav_info, map])),
+            (1, spacer),
         ]
 
         for segment in segments:
-            for i in range(segment["lines"]):
-                display_lines.append(segment["getLine"](i))
+            for i in range(segment[0]):
+                display_lines.append(" " * self.horizontalPad + segment[1](i))
 
         system('cls')
         print('\n'.join(display_lines), end="")
@@ -110,13 +115,14 @@ class Menu:
         options = [f"{i+1}. {v}" for i, v in enumerate(options)]
         maxOption = len(options) + 1
         out: str = ""
-        maxOptionLength = (termSize.columns - mapColumns - self.leftPadding -
-                           self.middlePadding - self.rightPadding - 2)
-        out += ' ' * (self.leftPadding + maxOptionLength + self.middlePadding)
+        maxOptionLength = (termSize.columns - mapColumns - self.horizontalPad -
+                           self.middlePadding - self.horizontalPad - 2)
+        out += ' ' * (self.horizontalPad + maxOptionLength +
+                      self.middlePadding)
         out += '\u250C' + '\u2500' * mapColumns + '\u2510'
-        out += ' ' * (self.rightPadding)
+        out += ' ' * (self.horizontalPad)
         for i, line in enumerate(map):
-            out += ' ' * (self.leftPadding)
+            out += ' ' * (self.horizontalPad)
             if i % 2 != 0 and len(options) != 0:
                 optionString = options.pop(0)[:maxOptionLength]
                 out += optionString
@@ -125,16 +131,17 @@ class Menu:
                 out += ' ' * (maxOptionLength)
             out += ' ' * (self.middlePadding)
             out += '\u2502' + ''.join(line) + '\u2502'
-            out += ' ' * (self.rightPadding)
-        out += ' ' * (self.leftPadding + maxOptionLength + self.middlePadding)
+            out += ' ' * (self.horizontalPad)
+        out += ' ' * (self.horizontalPad + maxOptionLength +
+                      self.middlePadding)
         out += '\u2514' + '\u2500' * mapColumns + '\u2518'
-        out += ' ' * (self.rightPadding)
+        out += ' ' * (self.horizontalPad)
         message = "Choose an option from above"
         while True:
             system('cls')
             print(out)
-            print('\033[F' * 3 + ' ' * self.leftPadding + message)
-            response = input(' ' * self.leftPadding + "> ")
+            print('\033[F' * 3 + ' ' * self.horizontalPad + message)
+            response = input(' ' * self.horizontalPad + "> ")
             if str.isdigit(response) and 0 < int(response) < maxOption:
                 system('cls')
                 return int(response) - 1

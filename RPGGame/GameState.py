@@ -7,6 +7,7 @@ class Behavior(TypedDict):
     key: str
     function: Callable[[], None]
 
+
 class Vector:
     values: List[int]
 
@@ -38,6 +39,18 @@ class Vector:
     def __getitem__(self, index: int) -> int:
         return self.values[index]
 
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        n = self.n
+        if n < len(self.values):
+            self.n += 1
+            return self.values[n]
+        else:
+            raise StopIteration
+
     def __add__(self, other: Vector) -> Vector:
         if len(self) != len(other):
             raise ValueError("Vectors are not the same length.")
@@ -60,7 +73,6 @@ class GameState:
         self._mapSegment = Vector(0, 0)
         self.playerPos = Vector(0, 0)
         # TODO: Add needed parameters to GameState constructor
-        pass
 
     def __call__(self, key: str) -> None:
         return self._call[key]()
