@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, Dict, List
+from typing import Callable, List
 from typing_extensions import TypedDict
 
 
@@ -63,43 +63,12 @@ class Vector:
 
 
 class GameState:
-    # Bindings to all menu and behavior functions
-    _call: Dict[str, Callable[[], None]]
-    _mapSegment: Vector
-    playerPos: Vector
+    map_pos: Vector
+    pos: Vector
 
     def __init__(self):
-        self._call = {}
-        self._mapSegment = Vector(0, 0)
-        self.playerPos = Vector(0, 0)
-        # TODO: Add needed parameters to GameState constructor
+        self.map_pos = Vector(0, 0)
+        self.pos = Vector(0, 0)
 
-    def __call__(self, key: str) -> None:
-        return self._call[key]()
-
-    def registerItem(self, behavior: Behavior) -> GameState:
-        """Registers a menu or behavior to the game to be used in the map.
-
-        Args:
-            behavior: Dictionary with the key for the function to be stored
-                      under and function for the actual function.
-        Returns:
-            The class instance the method was called on.
-        """
-        self._call[behavior["key"]] = behavior["function"]
-        return self
-
-    def registerItems(self, behaviors: List[Behavior]) -> GameState:
-        """Registers multiple menus and/or behaviors for use in the game.
-
-        Args:
-            behaviors: A list of behavior dictionaries.
-        Returns:
-            The class instance the method was called on.
-        """
-        for behavior in behaviors:
-            self.registerItem(behavior)
-        return self
-
-    def movePlayer(self, movement: Vector):
-        self.playerPos = self.playerPos + movement
+    def move(self, movement: Vector):
+        self.pos += movement

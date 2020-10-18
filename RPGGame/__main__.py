@@ -4,11 +4,12 @@
 # An interactive adventure game.
 # Currently only example code is implemented.
 
+from RPGGame.Menu import Menu
+from RPGGame.Game import Game
 from RPGGame.maps import maps
-from RPGGame.GameState import GameState
-from RPGGame.GameWindow import GameWindow
 
 if __name__ == "__main__":
-    window = GameWindow(GameState())
-    window.addMaps(maps)
-    window.run()
+    game = Game()
+    game.register('menu', Menu())
+    game.register('maps', maps)
+    game.run()
