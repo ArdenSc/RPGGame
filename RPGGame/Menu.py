@@ -1,6 +1,7 @@
 from __future__ import annotations
 from functools import partial
 from RPGGame.util import clear
+from RPGGame.abstract.AbstractWidget import AbstractWidget
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.GameState import Vector
 from RPGGame.MapSegment import MapSegment
@@ -62,6 +63,44 @@ def nav_info(i: int) -> str:
         return menu[0]
 
 
+class Scaffold(AbstractWidget):
+    def __init__(self, children: List[AbstractWidget]) -> None:
+        self.children = children
+        self.lengths = [len(child) for child in children]
+
+    def __len__(self) -> int:
+        return sum(self.lengths)
+
+    def build(self, i: int) -> str:
+        for child, length in zip(self.children, self.lengths):
+            if i < length:
+                return child.build(i)
+            else:
+                i -= length
+        raise AssertionError("Code should never be reached")
+
+
+class Spacer(AbstractWidget):
+    def __init__(self, lines: int = 1) -> None:
+        self.lines = lines
+
+    def __len__(self) -> int:
+        return self.lines
+
+    def build(self, i: int) -> str:
+        return ''
+
+class Text(AbstractWidget):
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def __len__(self) -> int:
+        return 1
+
+    def build(self, i: int) -> str:
+        return self.text
+
+
 class Menu(AbstractMenu):
     def __init__(
         self,
@@ -108,6 +147,21 @@ class Menu(AbstractMenu):
         for segment in segments:
             for i in range(segment[0]):
                 display_lines.append(" " * self.horizontalPad + segment[1](i))
+
+        # yapf: disable
+        # display: List[AbstractWidget] = [
+        #     Scaffold(
+        #         children=[
+        #             Spacer(5),
+        #             Text("Hello World!"),
+        #         ],
+        #     ),
+        # ]
+        # yapf: enable
+
+        # for child in display:
+        #     for i in range(len(child)):
+        #         display_lines.append(child.build(i))
 
         clear()
         print('\n'.join(display_lines), end="")
