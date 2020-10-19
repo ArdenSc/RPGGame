@@ -1,18 +1,65 @@
 from __future__ import annotations
+from functools import partial
 from RPGGame.util import clear
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.GameState import Vector
 from RPGGame.MapSegment import MapSegment
 from RPGGame.KeyPress import GetKeyPress
-from typing import Callable, List, Union
+from typing import Callable, List, Tuple, Union
 from os import get_terminal_size
 from copy import deepcopy
-from functools import partial
 
 
 def uniformLineLengths(map: List[List[str]]) -> List[List[str]]:
     columns = len(max(map, key=len))
     return [line + [' '] * (columns - len(line)) for line in map]
+
+
+def spacer(i: int) -> str:
+    return ""
+
+
+def dist_horizontal(args: List[Union[str, Callable[[int], str]]], width: int,
+                    i: int) -> str:
+    strings = [arg(i) if callable(arg) else arg for arg in args]
+    extra_space = width - sum(len(string) for string in strings)
+    spacer = ' ' * (extra_space // (len(args) - 1))
+    return spacer.join(strings)
+
+
+def border(arg: Union[str, Callable[[int], str]], inner_width: int,
+           inner_height: int, i: int) -> str:
+    if i == 0:
+        return '\u250C' + '\u2500' * inner_width + '\u2510'
+    elif i == inner_height + 1:
+        return '\u2514' + '\u2500' * inner_width + '\u2518'
+    else:
+        return '\u2502' + (arg(i - 1) if callable(arg) else arg) + '\u2502'
+
+
+def map(map: List[List[str]], i: int) -> str:
+    return ''.join(map[i])
+
+
+def nav_info(i: int) -> str:
+    menu = [
+        r"              ",
+        r"              ",
+        r"              ",
+        r"              ",
+        r"              ",
+        r"              ",
+        r"              ",
+        r"  W ---- Up   ",
+        r"A S D -- Right",
+        r" \ \---- Down ",
+        r"  \----- Left ",
+        r"  Q ---- Quit ",
+    ]
+    try:
+        return menu[i]
+    except IndexError:
+        return menu[0]
 
 
 class Menu(AbstractMenu):
@@ -48,44 +95,13 @@ class Menu(AbstractMenu):
         x, y = pos
         map_copy[y][x] = "O"
 
-        def spacer(i: int) -> str:
-            return ""
-
-        def dist_horizontal(args: List[Union[str, Callable[[int], str]]],
-                            i: int) -> str:
-            extra_space = width
-            strings = [arg(i) if callable(arg) else arg for arg in args]
-            for string in strings:
-                extra_space -= len(string)
-            spacer = ' ' * (extra_space // (len(args) - 1))
-            return spacer.join(strings)
-
-        def map(i: int) -> str:
-            return ''.join(map_copy[i])
-
-        def nav_info(i: int) -> str:
-            menu = [
-                r"              ",
-                r"              ",
-                r"              ",
-                r"              ",
-                r"              ",
-                r"              ",
-                r"              ",
-                r"  W ---- Up   ",
-                r"A S D -- Right",
-                r" \ \---- Down ",
-                r"  \----- Left ",
-                r"  Q ---- Quit ",
-            ]
-            try:
-                return menu[i]
-            except IndexError:
-                return menu[0]
-
-        segments = [
+        segments: List[Tuple[int, Callable[[int], str]]] = [
             (5, spacer),
-            (len(map_copy), partial(dist_horizontal, [nav_info, map])),
+            (len(map_copy) + 2, lambda i: dist_horizontal([
+                nav_info,
+                border(partial(map, map_copy), len(game_map.map[0]),
+                       len(game_map.map), i)
+            ], width, i)),
             (1, spacer),
         ]
 
@@ -125,12 +141,12 @@ class Menu(AbstractMenu):
         out += ' ' * (self.horizontalPad)
         for i, line in enumerate(game_map):
             out += ' ' * (self.horizontalPad)
-            if i % 2 != 0 and len(options) != 0:
+            if i % 2 == 0 or not options:
+                out += ' ' * (maxOptionLength)
+            else:
                 optionString = options.pop(0)[:maxOptionLength]
                 out += optionString
                 out += ' ' * (maxOptionLength - len(optionString))
-            else:
-                out += ' ' * (maxOptionLength)
             out += ' ' * (self.middlePadding)
             out += '\u2502' + ''.join(line) + '\u2502'
             out += ' ' * (self.horizontalPad)

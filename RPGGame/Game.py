@@ -20,7 +20,6 @@ def invalid_register_type():
 
 class Game:
     _state: GameState
-    _maps: List[List[MapSegment]]
     _menu: AbstractMenu
 
     def __init__(self) -> None:
@@ -40,7 +39,7 @@ class Game:
         self._menu = menu
 
     def register_maps(self, maps: List[List[MapSegment]]) -> None:
-        self._maps = maps
+        self._state.maps = maps
 
     @overload
     def register(self, type: Literal['menu'], menu: AbstractMenu) -> None:
@@ -57,13 +56,12 @@ class Game:
     def run(self) -> None:
         if not hasattr(self, '_menu'):
             raise AttributeError("A Menu is required to run the game.")
-        if not hasattr(self, '_maps'):
+        if not hasattr(self._state, 'maps'):
             raise AttributeError("Maps are required to run the game.")
         terminal_resize(135, 35)
-        x, y = self._state.map_pos
-        map = self._maps[y][x]
         while 1:
-            dir = self._menu.navigate(map, self._state.pos)
+            dir = self._menu.navigate(self._state.map(*self._state.map_pos),
+                                      self._state.pos)
             if dir == 4:
                 break
             self._state.move(self.dir_switch.get(dir, Vector(0, 0)))
