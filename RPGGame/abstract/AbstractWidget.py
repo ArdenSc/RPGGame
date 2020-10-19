@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
+from typing import Callable, List, Tuple, Union
 
 
 class AbstractWidget(ABC):
     @abstractmethod
-    def build(self, i: int) -> str:
-        ...
-
-    @abstractmethod
-    def __len__(self) -> int:
+    def build(
+        self
+    ) -> Union[Tuple[List[str], Tuple[int, int]], Callable[[int, int],
+                                                           List[str]]]:
         ...

@@ -20,7 +20,10 @@ class _GetKeyPressWindows:
         self.getch = getch
 
     def __call__(self):
-        ch = self.getch()
+        ch = b''
+        while 1:
+            ch = self.getch()
+            if ch: break
         try:
             return bytes.decode(ch)
         except:

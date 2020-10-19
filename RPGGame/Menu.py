@@ -1,104 +1,104 @@
 from __future__ import annotations
-from functools import partial
+from RPGGame.abstract.StaticWidget import StaticWidget
+from RPGGame.abstract.DynamicWidget import DynamicWidget
 from RPGGame.util import clear
 from RPGGame.abstract.AbstractWidget import AbstractWidget
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.GameState import Vector
 from RPGGame.MapSegment import MapSegment
 from RPGGame.KeyPress import GetKeyPress
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Literal, Tuple, Union
 from os import get_terminal_size
 from copy import deepcopy
 
 
-def uniformLineLengths(map: List[List[str]]) -> List[List[str]]:
-    columns = len(max(map, key=len))
-    return [line + [' '] * (columns - len(line)) for line in map]
-
-
-def spacer(i: int) -> str:
-    return ""
-
-
-def dist_horizontal(args: List[Union[str, Callable[[int], str]]], width: int,
-                    i: int) -> str:
-    strings = [arg(i) if callable(arg) else arg for arg in args]
-    extra_space = width - sum(len(string) for string in strings)
-    spacer = ' ' * (extra_space // (len(args) - 1))
-    return spacer.join(strings)
-
-
-def border(arg: Union[str, Callable[[int], str]], inner_width: int,
-           inner_height: int, i: int) -> str:
-    if i == 0:
-        return '\u250C' + '\u2500' * inner_width + '\u2510'
-    elif i == inner_height + 1:
-        return '\u2514' + '\u2500' * inner_width + '\u2518'
-    else:
-        return '\u2502' + (arg(i - 1) if callable(arg) else arg) + '\u2502'
-
-
-def map(map: List[List[str]], i: int) -> str:
-    return ''.join(map[i])
-
-
-def nav_info(i: int) -> str:
-    menu = [
-        r"              ",
-        r"              ",
-        r"              ",
-        r"              ",
-        r"              ",
-        r"              ",
-        r"              ",
-        r"  W ---- Up   ",
-        r"A S D -- Right",
-        r" \ \---- Down ",
-        r"  \----- Left ",
-        r"  Q ---- Quit ",
-    ]
-    try:
-        return menu[i]
-    except IndexError:
-        return menu[0]
-
-
-class Scaffold(AbstractWidget):
+class Scaffold(DynamicWidget):
     def __init__(self, children: List[AbstractWidget]) -> None:
         self.children = children
-        self.lengths = [len(child) for child in children]
 
-    def __len__(self) -> int:
-        return sum(self.lengths)
+    def build_sized(self, width: int, height: int) -> List[str]:
+        build_results = [child.build() for child in self.children]
+        static: List[Tuple[Tuple[List[str], Tuple[int, int]], int]] = []
+        dynamic: List[Tuple[Callable[[int, int], List[str]], int]] = []
+        for i, x in enumerate(build_results):
+            dynamic.append((x, i)) if callable(x) else static.append((x, i))
+        remain_height = height - sum(x[0][1][1] for x in static)
+        children = [(x[0][0], x[1]) for x in static]
+        if len(dynamic):
+            dynamic_height = remain_height // len(dynamic)
+            children += [(x[0](width, dynamic_height), x[1]) for x in dynamic]
 
-    def build(self, i: int) -> str:
-        for child, length in zip(self.children, self.lengths):
-            if i < length:
-                return child.build(i)
-            else:
-                i -= length
-        raise AssertionError("Code should never be reached")
+        children.sort(key=lambda x: x[1])
+        result: List[str] = []
+        for child in children:
+            result += child[0]
+        return result
 
 
-class Spacer(AbstractWidget):
+class Spacer(StaticWidget):
     def __init__(self, lines: int = 1) -> None:
         self.lines = lines
 
-    def __len__(self) -> int:
-        return self.lines
+    def build(self):
+        result = [''] * self.lines
+        width = 0
+        height = self.lines
+        return (result, (width, height))
 
-    def build(self, i: int) -> str:
-        return ''
 
-class Text(AbstractWidget):
-    def __init__(self, text: str) -> None:
-        self.text = text
+class Text(StaticWidget):
+    def __init__(self, text: str, max_length: int = 0) -> None:
+        self.text = text.split('\n')
+        self.max_length = max_length
 
-    def __len__(self) -> int:
-        return 1
+    def build(self):
+        result: List[str] = []
+        for line in self.text:
+            if self.max_length != 0:
+                while line:
+                    result += [line[:self.max_length]]
+                    line = line[self.max_length:]
+            else:
+                result += [line]
+        width = len(max(result, key=len))
+        height = len(result)
+        return (result, (width, height))
 
-    def build(self, i: int) -> str:
-        return self.text
+
+class Border(StaticWidget):
+    def __init__(self, child: StaticWidget):
+        self.child = child
+
+    def build(self):
+        child_result = self.child.build()
+        result = ['\u250C' + '\u2500' * child_result[1][0] + '\u2510']
+        result += ['\u2502' + x + '\u2502' for x in child_result[0]]
+        result += ['\u2514' + '\u2500' * child_result[1][0] + '\u2518']
+        return (result, (child_result[1][0] + 2, child_result[1][1] + 2))
+
+
+class Center(DynamicWidget):
+    def __init__(self,
+                 child: StaticWidget,
+                 center: Union[Literal['vertical'], Literal['horizontal'],
+                               Literal['both']] = 'both'):
+        self.child = child
+        self.center = center
+
+    def build_sized(self, width: int, height: int):
+        child_result = self.child.build()
+        if self.center in ('horizontal', 'both'):
+            padding = (width - child_result[1][0]) // 2
+            child_result = ([(' ' * padding) + line + (' ' * padding)
+                             for line in child_result[0]], child_result[1])
+
+        if self.center in ('vertical', 'both'):
+            padding = (height - child_result[1][1]) // 2
+            child_result = (([''] * padding) + child_result[0] +
+                            ([''] * padding), child_result[1])
+        width = len(max(child_result[0], key=len))
+        height = len(child_result[0])
+        return child_result[0]
 
 
 class Menu(AbstractMenu):
@@ -118,6 +118,12 @@ class Menu(AbstractMenu):
         self.middlePadding = middlePadding
         self.getKeyPress = GetKeyPress()
 
+    def display(self, width: int, height: int, widget: AbstractWidget) -> None:
+        clear()
+        result = widget.build()
+        print('\n'.join(
+            result(width, height) if callable(result) else result[0]))
+
     def navigate(self, game_map: MapSegment, pos: Vector) -> int:
         """Waits for a navigational key to be pressed.
 
@@ -126,63 +132,43 @@ class Menu(AbstractMenu):
                  clockwise around a compass. Additionally, 4 may be returned
                  and logic should follow that quits the program.
         """
-        width = get_terminal_size().columns - self.horizontalPad * 2
-
-        display_lines = []
+        size = get_terminal_size()
+        width, height = size.columns, size.lines
 
         map_copy = deepcopy(game_map.map)
         x, y = pos
         map_copy[y][x] = "O"
 
-        segments: List[Tuple[int, Callable[[int], str]]] = [
-            (5, spacer),
-            (len(map_copy) + 2, lambda i: dist_horizontal([
-                nav_info,
-                border(partial(map, map_copy), len(game_map.map[0]),
-                       len(game_map.map), i)
-            ], width, i)),
-            (1, spacer),
-        ]
-
-        for segment in segments:
-            for i in range(segment[0]):
-                display_lines.append(" " * self.horizontalPad + segment[1](i))
-
         # yapf: disable
-        # display: List[AbstractWidget] = [
-        #     Scaffold(
-        #         children=[
-        #             Spacer(5),
-        #             Text("Hello World!"),
-        #         ],
-        #     ),
-        # ]
+        self.display(
+            width, height - 1,
+            Scaffold(
+                children=[
+                    Center(
+                        Border(
+                            Text('\n'.join(''.join(x) for x in map_copy)),
+                        )
+                    ),
+                ],
+            ),
+        )
         # yapf: enable
-
-        # for child in display:
-        #     for i in range(len(child)):
-        #         display_lines.append(child.build(i))
-
-        clear()
-        print('\n'.join(display_lines), end="")
 
         while True:
             ch = self.getKeyPress()
-            if ch:
-                if ch == 'w':
-                    return 0
-                elif ch == 'd':
-                    return 1
-                elif ch == 's':
-                    return 2
-                elif ch == 'a':
-                    return 3
-                elif ch == 'q':
-                    return 4
+            if ch == 'w':
+                return 0
+            elif ch == 'd':
+                return 1
+            elif ch == 's':
+                return 2
+            elif ch == 'a':
+                return 3
+            elif ch == 'q':
+                return 4
 
     def select(self, game_map: List[List[str]], options: List[str]) -> int:
         termSize = get_terminal_size()
-        game_map = uniformLineLengths(game_map)
         mapColumns = len(game_map[0])
         options = [f"{i+1}. {v}" for i, v in enumerate(options)]
         maxOption = len(options) + 1
