@@ -104,3 +104,5 @@ class GameState:
             if my + 1 < len(self.maps):
                 self.map_pos += Vector(0, 1)
                 self.pos = Vector(self.pos[0], 0)
+            else:
+                self.pos = old_pos

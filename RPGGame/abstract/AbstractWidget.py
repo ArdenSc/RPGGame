@@ -3,7 +3,7 @@ from typing import Callable, List, Tuple, Union
 
 SizeData = Tuple[int, int]
 StaticWidgetData = Tuple[List[str], SizeData]
-DynamicWidgetData = Tuple[Callable[[int, int], List[str]], SizeData]
+DynamicWidgetData = Tuple[Callable[[int, int], StaticWidgetData], SizeData]
 
 
 class AbstractWidget(ABC):
@@ -14,7 +14,7 @@ class AbstractWidget(ABC):
 
 class DynamicWidget(AbstractWidget, metaclass=ABCMeta):
     @abstractmethod
-    def build_sized(self, width: int, height: int) -> List[str]:
+    def build_sized(self, width: int, height: int) -> StaticWidgetData:
         ...
 
     def build(self) -> DynamicWidgetData:
