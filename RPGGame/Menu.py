@@ -1,15 +1,54 @@
 from __future__ import annotations
-from RPGGame.abstract.StaticWidget import StaticWidget
-from RPGGame.abstract.DynamicWidget import DynamicWidget
+from RPGGame.abstract.AbstractWidget import *
 from RPGGame.util import clear
-from RPGGame.abstract.AbstractWidget import AbstractWidget
-from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.GameState import Vector
 from RPGGame.MapSegment import MapSegment
 from RPGGame.KeyPress import GetKeyPress
-from typing import Callable, List, Literal, Tuple, Union
+from typing import List, Literal, Tuple, Union
 from os import get_terminal_size
 from copy import deepcopy
+"""
+Scaffold(
+    Text('header'),
+    Stack(
+        justify='space-around',
+        Center(
+            mode='vertical',
+            Text('info'),
+        ),
+        Center(
+            mode='vertical',
+            Border(
+                Text('map'),
+            ),
+        ),
+    ),
+    Center(
+        Text('message'),
+    ),
+)
+"""
+
+
+class Scaffold(DynamicWidget):
+    def __init__(self, children: List[AbstractWidget]):
+        self.static: List[Tuple[StaticWidget, int]] = []
+        self.dynamic: List[Tuple[DynamicWidget, int]] = []
+
+        for i, child in enumerate(children):
+            if isinstance(child, StaticWidget):
+                self.static.append((child, i))
+            elif isinstance(child, DynamicWidget):
+                self.dynamic.append((child, i))
+
+    def build_sized(self, width: int, height: int):
+        static_builds = [(child[0].build(), child[1]) for child in self.static]
+        dynamic_builders = [(child[0].build(), child[1])
+                          for child in self.dynamic]
+        return []
+
+    def build(self):
+        return (self.build_sized, (0, 0))
 
 
 class Scaffold(DynamicWidget):
@@ -18,8 +57,8 @@ class Scaffold(DynamicWidget):
 
     def build_sized(self, width: int, height: int) -> List[str]:
         build_results = [child.build() for child in self.children]
-        static: List[Tuple[Tuple[List[str], Tuple[int, int]], int]] = []
-        dynamic: List[Tuple[Callable[[int, int], List[str]], int]] = []
+        static: List[Tuple[StaticWidgetData, int]] = []
+        dynamic: List[Tuple[DynamicWidgetData, int]] = []
         for i, x in enumerate(build_results):
             dynamic.append((x, i)) if callable(x) else static.append((x, i))
         remain_height = height - sum(x[0][1][1] for x in static)
