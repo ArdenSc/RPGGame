@@ -87,29 +87,6 @@ class Scaffold(DynamicWidget):
         return (self.build_sized, (0, 0))
 
 
-# class Scaffold(DynamicWidget):
-#     def __init__(self, children: List[AbstractWidget]) -> None:
-#         self.children = children
-
-#     def build_sized(self, width: int, height: int) -> List[str]:
-#         build_results = [child.build() for child in self.children]
-#         static: List[Tuple[StaticWidgetData, int]] = []
-#         dynamic: List[Tuple[DynamicWidgetData, int]] = []
-#         for i, x in enumerate(build_results):
-#             dynamic.append((x, i)) if callable(x) else static.append((x, i))
-#         remain_height = height - sum(x[0][1][1] for x in static)
-#         children = [(x[0][0], x[1]) for x in static]
-#         if len(dynamic):
-#             dynamic_height = remain_height // len(dynamic)
-#             children += [(x[0](width, dynamic_height), x[1]) for x in dynamic]
-
-#         children.sort(key=lambda x: x[1])
-#         result: List[str] = []
-#         for child in children:
-#             result += child[0]
-#         return result
-
-
 class Spacer(StaticWidget):
     def __init__(self, lines: int = 1) -> None:
         self.lines = lines
@@ -181,30 +158,6 @@ class Center(DynamicWidget):
         height = 0 if self.direction in ('vertical',
                                          'both') else self.child_dimens[1]
         return (self.build_sized, (width, height))
-
-
-# class Center(DynamicWidget):
-#     def __init__(self,
-#                  child: StaticWidget,
-#                  direction: Union[Literal['vertical'], Literal['horizontal'],
-#                                Literal['both']] = 'both'):
-#         self.child = child
-#         self.direction = direction
-
-#     def build_sized(self, width: int, height: int):
-#         child_result = self.child.build()
-#         if self.direction in ('horizontal', 'both'):
-#             padding = (width - child_result[1][0]) // 2
-#             child_result = ([(' ' * padding) + line + (' ' * padding)
-#                              for line in child_result[0]], child_result[1])
-
-#         if self.direction in ('vertical', 'both'):
-#             padding = (height - child_result[1][1]) // 2
-#             child_result = (([''] * padding) + child_result[0] +
-#                             ([''] * padding), child_result[1])
-#         width = len(max(child_result[0], key=len))
-#         height = len(child_result[0])
-#         return child_result[0]
 
 
 class Menu(AbstractMenu):
