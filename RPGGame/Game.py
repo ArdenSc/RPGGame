@@ -1,4 +1,5 @@
 from __future__ import annotations
+from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from typing import Any, List, Literal, overload
 from RPGGame.MapSegment import MapSegment
@@ -33,7 +34,6 @@ class Game:
     Requires at least maps and a menu, add them using the register method.
     """
     _state: GameState
-    _menu: AbstractMenu
 
     def __init__(self) -> None:
         """Creates an instance of the game framework"""
@@ -41,6 +41,7 @@ class Game:
         self._register_switch = {
             "menu": self._register_menu,
             "maps": self._register_maps,
+            "behaviors": self._register_behaviors,
         }
         self._dir_switch = {
             0: Vector.North(),
@@ -51,11 +52,14 @@ class Game:
 
     def _register_menu(self, menu: AbstractMenu) -> None:
         """Internal method for registering a menu"""
-        self._menu = menu
+        self._state.menu = menu
 
     def _register_maps(self, maps: List[List[MapSegment]]) -> None:
         """Internal method for registering maps"""
         self._state.maps = maps
+
+    def _register_behaviors(self, handler: AbstractBehaviorHandler) -> None:
+        self._behaviors = handler
 
     @overload
     def register(self, type: Literal['menu'], menu: AbstractMenu) -> None:
@@ -78,6 +82,11 @@ class Game:
         """
         ...
 
+    @overload
+    def register(self, type: Literal['behaviors'],
+                 handler: AbstractBehaviorHandler) -> None:
+        ...
+
     def register(self, type: str, *args: Any) -> None:
         """Base method for registering maps or a handler.
         See overloads for details specific to each registerable item.
@@ -88,14 +97,15 @@ class Game:
         """Starts the game.
         All requirements must have been registered before calling this method.
         """
-        if not hasattr(self, '_menu'):
+        if not hasattr(self._state, 'menu'):
             raise AttributeError("A Menu is required to run the game.")
         if not hasattr(self._state, 'maps'):
             raise AttributeError("Maps are required to run the game.")
         _terminal_resize(135, 35)
         while 1:
-            dir = self._menu.navigate(self._state.map(*self._state.map_pos),
-                                      self._state.pos)
+            dir = self._state.menu.navigate(
+                self._state.map(*self._state.map_pos), self._state.pos)
             if dir == 4:
                 break
             self._state.move(self._dir_switch.get(dir, Vector(0, 0)))
+            self._behaviors.on_move_callback(self._state, self._state.pos)

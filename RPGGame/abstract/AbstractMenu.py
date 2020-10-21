@@ -1,5 +1,5 @@
 from typing import List
-from RPGGame.GameState import Vector
+from RPGGame.Vector import Vector
 from RPGGame.MapSegment import MapSegment
 from abc import ABC, abstractmethod
 

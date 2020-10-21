@@ -1,8 +1,8 @@
 from __future__ import annotations
+from RPGGame.Vector import Vector
 from RPGGame.abstract.AbstractWidget import *
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.util import clear
-from RPGGame.GameState import Vector
 from RPGGame.MapSegment import MapSegment
 from RPGGame.KeyPress import GetKeyPress
 from typing import List, Literal, Tuple, Union
@@ -210,6 +210,10 @@ class Menu(AbstractMenu):
                 Spacer(1),
                 Center(
                     Text('header'),
+                ),
+                Center(
+                    direction='horizontal',
+                    child=Text(str(pos)),
                 ),
                 Center(
                     direction='horizontal',
