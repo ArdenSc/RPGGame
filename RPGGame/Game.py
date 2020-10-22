@@ -1,11 +1,13 @@
 from __future__ import annotations
-from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
-from RPGGame.abstract.AbstractMenu import AbstractMenu
-from typing import Any, List, Literal, overload
-from RPGGame.MapSegment import MapSegment
-from RPGGame.GameState import GameState, Vector
+
 from os import system
 from sys import platform
+from typing import Any, List, Literal, overload
+
+from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
+from RPGGame.abstract.AbstractMenu import AbstractMenu
+from RPGGame.GameState import GameState, Vector
+from RPGGame.MapSegment import MapSegment
 
 
 def _terminal_resize(columns: int, lines: int):

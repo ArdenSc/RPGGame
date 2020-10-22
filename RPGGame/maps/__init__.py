@@ -1,8 +1,9 @@
-from RPGGame.MapSegment import MapSegment
-from os import listdir, path
 from math import isqrt
+from os import listdir, path
 from re import search
 from typing import List, TypeVar
+
+from RPGGame.MapSegment import MapSegment
 
 files = listdir(path.dirname(__file__))
 

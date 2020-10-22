@@ -1,19 +1,19 @@
- stuff
-
-                                 something
-
-               rock
-
-                                                                             tree
-
-
-                    Map placeholder due to my lack of creativity
-
-
-            bridge
-
-                                              hill
-
-                                                                trader
-
-                        house
+################################################################################
+######                                                          ################
+###                               something                          ###########
+##                                                                      ########
+#               rock                                                      ######
+#                    ###########
+#                   #           #                                           tree
+#                  #             #
+#                   #           #
+#                    ###########
+#
+#
+#            bridge
+#
+#                                              hill
+#
+#                                                                trader
+#
+#                        house

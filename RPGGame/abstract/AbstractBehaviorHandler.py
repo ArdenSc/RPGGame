@@ -1,6 +1,7 @@
+from abc import ABC, abstractmethod
+
 from RPGGame.GameState import GameState
 from RPGGame.Vector import Vector
-from abc import ABC, abstractmethod
 
 
 class AbstractBehaviorHandler(ABC):

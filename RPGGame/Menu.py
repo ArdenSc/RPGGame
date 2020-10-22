@@ -1,14 +1,16 @@
 from __future__ import annotations
-from RPGGame.Vector import Vector
-from RPGGame.abstract.AbstractWidget import *
-from RPGGame.abstract.AbstractMenu import AbstractMenu
-from RPGGame.util import clear
-from RPGGame.MapSegment import MapSegment
-from RPGGame.KeyPress import GetKeyPress
-from typing import List, Literal, Tuple, Union
-from os import get_terminal_size
+
 from copy import deepcopy
 from functools import partial
+from os import get_terminal_size
+from typing import List, Literal, Tuple, Union
+
+from RPGGame.abstract.AbstractMenu import AbstractMenu
+from RPGGame.abstract.AbstractWidget import *
+from RPGGame.KeyPress import GetKeyPress
+from RPGGame.MapSegment import MapSegment
+from RPGGame.util import clear
+from RPGGame.Vector import Vector
 """
 Scaffold(
     Text('header'),
@@ -85,6 +87,18 @@ class Scaffold(DynamicWidget):
 
     def build(self):
         return (self.build_sized, (0, 0))
+
+
+class Stack(DynamicWidget):
+    def __init__(self, *children: AbstractWidget):
+        self.static: List[Tuple[StaticWidget, int]] = []
+        self.dynamic: List[Tuple[DynamicWidget, int]] = []
+
+        for i, child in enumerate(children):
+            if isinstance(child, StaticWidget):
+                self.static.append((child, i))
+            elif isinstance(child, DynamicWidget):
+                self.dynamic.append((child, i))
 
 
 class Spacer(StaticWidget):

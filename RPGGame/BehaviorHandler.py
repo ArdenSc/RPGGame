@@ -1,10 +1,12 @@
-from RPGGame.Item import Item
-from typing import Callable, List
-from RPGGame.Vector import Vector
-from RPGGame.GameState import GameState
-from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
-from typing_extensions import TypedDict
 from functools import partial
+from typing import Callable, List
+
+from typing_extensions import TypedDict
+
+from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
+from RPGGame.GameState import GameState
+from RPGGame.Item import Item
+from RPGGame.Vector import Vector
 
 
 class Behavior(TypedDict):
@@ -22,12 +24,12 @@ class BehaviorHandler(AbstractBehaviorHandler):
             "trigger_map":
             Vector(0, 0),
             "handler":
-            partial(self.add_to_inventory, item=Item("Sword")),
+            partial(self._add_to_inventory, item=Item("Sword")),
             "one_time":
             True
         }]
 
-    def add_to_inventory(self, state: GameState, item: Item) -> None:
+    def _add_to_inventory(self, state: GameState, item: Item) -> None:
         state.inventory.append(item)
 
     def on_move_callback(self, state: GameState, pos: Vector) -> None:

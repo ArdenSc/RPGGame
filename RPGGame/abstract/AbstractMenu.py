@@ -1,7 +1,8 @@
-from typing import List
-from RPGGame.Vector import Vector
-from RPGGame.MapSegment import MapSegment
 from abc import ABC, abstractmethod
+from typing import List
+
+from RPGGame.MapSegment import MapSegment
+from RPGGame.Vector import Vector
 
 
 class AbstractMenu(ABC):

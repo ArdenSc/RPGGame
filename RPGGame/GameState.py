@@ -1,9 +1,11 @@
 from __future__ import annotations
-from RPGGame.Inventory import Inventory
-from RPGGame.Vector import Vector
-from RPGGame.abstract.AbstractMenu import AbstractMenu
-from RPGGame.MapSegment import MapSegment
+
 from typing import List
+
+from RPGGame.abstract.AbstractMenu import AbstractMenu
+from RPGGame.Inventory import Inventory
+from RPGGame.MapSegment import MapSegment
+from RPGGame.Vector import Vector
 
 
 class GameState:
@@ -12,7 +14,7 @@ class GameState:
 
     def __init__(self):
         self.map_pos = Vector(0, 0)
-        self.pos = Vector(0, 0)
+        self.pos = Vector(5, 3)
         self.inventory = Inventory()
 
     def map(self, x: int, y: int) -> MapSegment:
@@ -49,3 +51,7 @@ class GameState:
                 self.pos = Vector(self.pos[0], 0)
             else:
                 self.pos = old_pos
+
+        x, y = self.pos
+        if self.map(*self.map_pos).map[y][x] == '#':
+            self.pos = old_pos

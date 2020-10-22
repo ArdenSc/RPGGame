@@ -1,4 +1,5 @@
 from typing import List
+
 from RPGGame.Item import Item
 
 
@@ -20,6 +21,10 @@ class Inventory:
             return self._data[n]
         else:
             raise StopIteration
+
+    def __str__(self) -> str:
+        return '\n'.join(['Inventory:'] +
+                         [f'- {str(item)}' for item in self._data])
 
     def append(self, new: Item):
         self._data.append(new)
