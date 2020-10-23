@@ -13,7 +13,7 @@ def strip_newlines(x: List[str]):
 
 
 def name_to_file(x: str):
-    with open(path.join(path.dirname(__file__), x)) as file:
+    with open(path.join(path.dirname(__file__), x), encoding='utf-8') as file:
         return file.readlines()
 
 

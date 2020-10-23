@@ -53,5 +53,5 @@ class GameState:
                 self.pos = old_pos
 
         x, y = self.pos
-        if self.map(*self.map_pos).map[y][x] == '#':
+        if self.map(*self.map_pos).map[y][x] in ('▀', '▌', '▁', '▔'):
             self.pos = old_pos
