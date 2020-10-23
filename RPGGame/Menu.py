@@ -4,6 +4,7 @@ from copy import deepcopy
 from functools import partial
 from os import get_terminal_size
 from typing import List, Literal, Tuple, Union
+from itertools import zip_longest
 
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.abstract.AbstractWidget import *
@@ -32,6 +33,10 @@ Scaffold(
     ),
 )
 """
+
+
+def uniform_line_lengths(lines: List[str], columns: int) -> List[str]:
+    return [x + ' ' * (columns - len(x)) for x in lines]
 
 
 class Scaffold(DynamicWidget):
@@ -99,6 +104,60 @@ class Stack(DynamicWidget):
                 self.static.append((child, i))
             elif isinstance(child, DynamicWidget):
                 self.dynamic.append((child, i))
+
+    def build_sized(self, width: int, height: int) -> StaticWidgetData:
+        remain_width = width
+        remain_width -= sum(build[0][1][0] for build in self.builds)
+        remain_width -= sum(builder[0][1][0] for builder in self.builds)
+
+        has_greedy_child = any(builder[0][1][0] == 0
+                               for builder in self.dynamic_builders)
+
+        self.dynamic_builders = [((partial(
+            builder[0][0],
+            height=height if builder[0][1][1] == 0 else builder[0][1][1]),
+                                   builder[0][1]), builder[1])
+                                 for builder in self.dynamic_builders]
+
+        if has_greedy_child:
+            amount_greedy = len(
+                [x for x in self.dynamic_builders if x[0][1][0] == 0])
+            width_per_greedy = remain_width // amount_greedy
+            self.builds += [(builder[0][0](builder[0][1][1]), builder[1])
+                            for builder in self.dynamic_builders
+                            if builder[0][1][0] != 0]
+            self.builds += [(builder[0][0](width_per_greedy), builder[1])
+                            for builder in self.dynamic_builders
+                            if builder[0][1][0] == 0]
+        else:
+            width_per_greedy = remain_width // len(self.dynamic_builders)
+            self.builds += [
+                (builder[0][0](builder[0][1][0] + width_per_greedy),
+                 builder[1]) for builder in self.dynamic_builders
+            ]
+
+        self.builds.sort(key=lambda x: x[1])
+        child_widths = [
+            len(max(build[0][0], key=len)) for build in self.builds
+        ]
+        build_result = [
+            ''.join([
+                x if x != None else ' ' * child_widths[i]
+                for i, x in enumerate(line)
+            ]) for line in zip_longest(*[build[0][0] for build in self.builds])
+        ]
+        build_dimens = (sum(build[0][1][0] for build in self.builds),
+                        max(build[0][1][1] for build in self.builds))
+        return (build_result, build_dimens)
+
+    def build(self) -> DynamicWidgetData:
+        self.builds = [(child[0].build(), child[1]) for child in self.static]
+        self.dynamic_builders = [(child[0].build(), child[1])
+                                 for child in self.dynamic]
+        self.height = max(
+            [build[0][1][1] for build in self.builds] +
+            [builder[0][1][1] for builder in self.dynamic_builders])
+        return (self.build_sized, (0, self.height))
 
 
 class Spacer(StaticWidget):
@@ -221,22 +280,18 @@ class Menu(AbstractMenu):
         self.display(
             width, height,
             Scaffold(
-                Spacer(1),
-                Center(
-                    Text('header'),
+                Text('header'),
+                Stack(
+                    Text('info\ninfo\ninfo\ninfo'),
+                    Center(
+                        direction="horizontal",
+                        child=Border(
+                            Text('\n'.join(''.join(x) for x in map_copy)),
+                        ),
+                    )
                 ),
                 Center(
-                    direction='horizontal',
-                    child=Text(str(pos)),
-                ),
-                Center(
-                    direction='horizontal',
-                    child=Border(
-                        Text('\n'.join(''.join(x) for x in map_copy)),
-                    ),
-                ),
-                Center(
-                    Text('footer'),
+                    Text('message'),
                 ),
             ),
         )
