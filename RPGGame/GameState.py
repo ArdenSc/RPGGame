@@ -11,11 +11,13 @@ from RPGGame.Vector import Vector
 class GameState:
     maps: List[List[MapSegment]]
     menu: AbstractMenu
+    gameplay_state: str
 
     def __init__(self):
         self.map_pos = Vector(0, 0)
         self.pos = Vector(5, 3)
         self.inventory = Inventory()
+        self.gameplay_state = 'start'
 
     def map(self, x: int, y: int) -> MapSegment:
         return self.maps[y][x]
@@ -53,5 +55,6 @@ class GameState:
                 self.pos = old_pos
 
         x, y = self.pos
-        if self.map(*self.map_pos).map[y][x] in ('▀', '▌', '▁', '▔'):
+        if self.map(*self.map_pos).map[y][x] in ('▀', '▌', '▁', '▔', '▄', '█',
+                                                 '▛', '▜', '▙', '▟', '▐'):
             self.pos = old_pos

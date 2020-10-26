@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from copy import deepcopy
 from functools import partial
-from os import get_terminal_size
-from typing import List, Literal, Tuple, Union
 from itertools import zip_longest
+from os import get_terminal_size
+from typing import List, Tuple, Union
+
+from typing_extensions import Literal
 
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.abstract.AbstractWidget import *
@@ -12,6 +14,7 @@ from RPGGame.KeyPress import GetKeyPress
 from RPGGame.MapSegment import MapSegment
 from RPGGame.util import clear
 from RPGGame.Vector import Vector
+
 """
 Scaffold(
     Text('header'),
@@ -261,6 +264,41 @@ class Menu(AbstractMenu):
             raise AttributeError
         print('\n'.join(build[0]))
 
+    def mainmenu(self) -> int:
+        size = get_terminal_size()
+        width, height = size.columns, size.lines
+
+        # yapf: disable
+        self.display(
+            width,
+            height,
+            Scaffold(
+                Center(
+                    Text(r"""
+ _____  _____   _____
+|  __ \|  __ \ / ____|
+| |__) | |__) | |  __  __ _ _ __ ___   ___
+|  _  /|  ___/| | |_ |/ _` | '_ ` _ \ / _ \
+| | \ \| |    | |__| | (_| | | | | | |  __/
+|_|  \_\_|     \_____|\__,_|_| |_| |_|\___|
+
+"""),
+                ),
+                Center(
+                    direction="horizontal",
+                    child=Text("Press any key to Start. Q to Quit"),
+                ),
+            ),
+        )
+        # yapf: enable
+
+        while True:
+            ch = self.getKeyPress()
+            if ch == 'q':
+                return 1
+            else:
+                return 0
+
     def navigate(self, game_map: MapSegment, pos: Vector) -> int:
         """Waits for a navigational key to be pressed.
 
@@ -280,7 +318,10 @@ class Menu(AbstractMenu):
         self.display(
             width, height,
             Scaffold(
-                Text('header'),
+                Spacer(),
+                Center(
+                    Text('header'),
+                ),
                 Stack(
                     Text('info\ninfo\ninfo\ninfo'),
                     Center(

@@ -2,12 +2,18 @@ from __future__ import annotations
 
 from os import system
 from sys import platform
-from typing import Any, List, Literal, overload
+from typing import Any, List, overload
+
+from typing_extensions import Literal
 
 from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.GameState import GameState, Vector
 from RPGGame.MapSegment import MapSegment
+
+
+class StopGame(Exception):
+    ...
 
 
 def _terminal_resize(columns: int, lines: int):
@@ -30,6 +36,10 @@ def _invalid_register_type():
     raise AttributeError("Invalid type registered to Game object.")
 
 
+def _invalid_gameplay_state():
+    raise AttributeError("Invalid gameplay state.")
+
+
 class Game:
     """A semi-modular framework for a terminal rpg game.
 
@@ -50,6 +60,12 @@ class Game:
             1: Vector.East(),
             2: Vector.South(),
             3: Vector.West(),
+        }
+        self._state_switch = {
+            "start": self._mainmenu,
+            "navigate": self._navigate,
+            "fight": lambda: None,
+            "inventory": lambda: None,
         }
 
     def _register_menu(self, menu: AbstractMenu) -> None:
@@ -93,7 +109,21 @@ class Game:
         """Base method for registering maps or a handler.
         See overloads for details specific to each registerable item.
         """
-        self._register_switch.get(type, _invalid_register_type)(*args)
+        self._register_switch.get(type, _invalid_register_type)(*args)\
+
+    def _navigate(self) -> None:
+        dir = self._state.menu.navigate(self._state.map(*self._state.map_pos),
+                                        self._state.pos)
+        if dir == 4:
+            raise StopGame
+        self._state.move(self._dir_switch.get(dir, Vector(0, 0)))
+        self._behaviors.on_move_callback(self._state, self._state.pos)
+
+    def _mainmenu(self) -> None:
+        result = self._state.menu.mainmenu()
+        if result == 1:
+            raise StopGame
+        self._state.gameplay_state = "navigate"
 
     def run(self) -> None:
         """Starts the game.
@@ -104,10 +134,9 @@ class Game:
         if not hasattr(self._state, 'maps'):
             raise AttributeError("Maps are required to run the game.")
         _terminal_resize(135, 35)
-        while 1:
-            dir = self._state.menu.navigate(
-                self._state.map(*self._state.map_pos), self._state.pos)
-            if dir == 4:
+        while True:
+            try:
+                self._state_switch.get(self._state.gameplay_state,
+                                       _invalid_gameplay_state)()
+            except StopGame:
                 break
-            self._state.move(self._dir_switch.get(dir, Vector(0, 0)))
-            self._behaviors.on_move_callback(self._state, self._state.pos)

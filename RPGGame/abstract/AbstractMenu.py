@@ -11,5 +11,9 @@ class AbstractMenu(ABC):
         ...
 
     @abstractmethod
+    def mainmenu(self) -> int:
+        ...
+
+    @abstractmethod
     def select(self, game_map: List[List[str]], options: List[str]) -> int:
         ...
