@@ -310,7 +310,7 @@ class Menu(AbstractMenu):
         size = get_terminal_size()
         width, height = size.columns, size.lines
 
-        map_copy = deepcopy(game_map.map)
+        map_copy = deepcopy(game_map.get())
         x, y = pos
         map_copy[y][x] = "O"
 
@@ -350,41 +350,3 @@ class Menu(AbstractMenu):
                 return 3
             elif ch == 'q':
                 return 4
-
-    def select(self, game_map: List[List[str]], options: List[str]) -> int:
-        termSize = get_terminal_size()
-        mapColumns = len(game_map[0])
-        options = [f"{i+1}. {v}" for i, v in enumerate(options)]
-        maxOption = len(options) + 1
-        out: str = ""
-        maxOptionLength = (termSize.columns - mapColumns - self.horizontalPad -
-                           self.middlePadding - self.horizontalPad - 2)
-        out += ' ' * (self.horizontalPad + maxOptionLength +
-                      self.middlePadding)
-        out += '\u250C' + '\u2500' * mapColumns + '\u2510'
-        out += ' ' * (self.horizontalPad)
-        for i, line in enumerate(game_map):
-            out += ' ' * (self.horizontalPad)
-            if i % 2 == 0 or not options:
-                out += ' ' * (maxOptionLength)
-            else:
-                optionString = options.pop(0)[:maxOptionLength]
-                out += optionString
-                out += ' ' * (maxOptionLength - len(optionString))
-            out += ' ' * (self.middlePadding)
-            out += '\u2502' + ''.join(line) + '\u2502'
-            out += ' ' * (self.horizontalPad)
-        out += ' ' * (self.horizontalPad + maxOptionLength +
-                      self.middlePadding)
-        out += '\u2514' + '\u2500' * mapColumns + '\u2518'
-        out += ' ' * (self.horizontalPad)
-        message = "Choose an option from above"
-        while True:
-            clear()
-            print(out)
-            print('\033[F' * 3 + ' ' * self.horizontalPad + message)
-            response = input(' ' * self.horizontalPad + "> ")
-            if str.isdigit(response) and 0 < int(response) < maxOption:
-                clear()
-                return int(response) - 1
-            message = "Sorry, please choose a valid number"

@@ -4,6 +4,7 @@ from typing import Callable, List
 from typing_extensions import TypedDict
 
 from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
+from RPGGame.abstract.AbstractEnemy import AbstractEnemy
 from RPGGame.GameState import GameState
 from RPGGame.Item import Item
 from RPGGame.Vector import Vector
@@ -32,7 +33,11 @@ class BehaviorHandler(AbstractBehaviorHandler):
     def _add_to_inventory(self, state: GameState, item: Item) -> None:
         state.inventory.append(item)
 
-    def on_move_callback(self, state: GameState, pos: Vector) -> None:
+    def _start_fight(self, state: GameState, enemy: AbstractEnemy) -> None:
+        state.gameplay_state = "fight"
+        state.target = enemy
+
+    def on_move_callback(self, state: GameState) -> None:
         for behavior in self._behaviors:
             if behavior["trigger_pos"] == state.pos and behavior[
                     "trigger_map"] == state.map_pos:

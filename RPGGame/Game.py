@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 
 from os import system
 from sys import platform
@@ -109,21 +110,56 @@ class Game:
         """Base method for registering maps or a handler.
         See overloads for details specific to each registerable item.
         """
-        self._register_switch.get(type, _invalid_register_type)(*args)\
+        self._register_switch.get(type, _invalid_register_type)(*args)
 
     def _navigate(self) -> None:
-        dir = self._state.menu.navigate(self._state.map(*self._state.map_pos),
-                                        self._state.pos)
+        dir = self._state.menu.navigate(
+            self._state.get_map(*self._state.map_pos), self._state.pos)
         if dir == 4:
             raise StopGame
-        self._state.move(self._dir_switch.get(dir, Vector(0, 0)))
-        self._behaviors.on_move_callback(self._state, self._state.pos)
+        self._move(self._dir_switch[dir])
+        self._behaviors.on_move_callback(self._state)
 
     def _mainmenu(self) -> None:
         result = self._state.menu.mainmenu()
         if result == 1:
             raise StopGame
         self._state.gameplay_state = "navigate"
+
+    def _move(self, movement: Vector):
+        old_pos = deepcopy(self._state.pos)
+        self._state.pos += movement
+        x, y = self._state.pos
+        mx, my = self._state.map_pos
+        if x < 0:
+            if mx >= 1:
+                self._state.map_pos += Vector(-1, 0)
+                self._state.pos[0] = self._state.get_map(mx - 1, my).width - 1
+            else:
+                self.pos = old_pos
+        elif x >= self._state.get_map(mx, my).width:
+            if mx + 1 < len(self._state.maps[0]):
+                self._state.map_pos += Vector(1, 0)
+                self._state.pos[0] = 0
+            else:
+                self._state.pos = old_pos
+        if y < 0:
+            if my >= 1:
+                self._state.map_pos += Vector(0, -1)
+                self._state.pos[1] = self._state.get_map(mx, my - 1).height - 1
+            else:
+                self._state.pos = old_pos
+        elif y >= self._state.get_map(mx, my).height:
+            if my + 1 < len(self._state.maps):
+                self._state.map_pos += Vector(0, 1)
+                self._state.pos[1] = 0
+            else:
+                self._state.pos = old_pos
+
+        if self._state.get_map(*self._state.map_pos).get(
+                *self._state.pos) in ('▀', '▌', '▁', '▔', '▄', '█', '▛', '▜',
+                                      '▙', '▟', '▐'):
+            self._state.pos = old_pos
 
     def run(self) -> None:
         """Starts the game.

@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-from typing import List
-
 
 class Vector:
-    values: List[int]
-
     @staticmethod
     def North():
         return Vector(0, -1)
@@ -34,6 +30,9 @@ class Vector:
     def __getitem__(self, index: int) -> int:
         return self.values[index]
 
+    def __setitem__(self, index: int, value: int) -> None:
+        self.values[index] = value
+
     def __iter__(self):
         self.n = 0
         return self
@@ -52,9 +51,11 @@ class Vector:
     def __add__(self, other: Vector) -> Vector:
         if len(self) != len(other):
             raise ValueError("Vectors are not the same length.")
-        return Vector(*(x + y for x, y in zip(self, other)))
+        self.values = [x + y for x, y in zip(self, other)]
+        return self
 
     def __sub__(self, other: Vector) -> Vector:
         if len(self) != len(other):
             raise ValueError("Vectors are not the same length.")
-        return Vector(*(x - y for x, y in zip(self, other)))
+        self.values = [x - y for x, y in zip(self, other)]
+        return self
