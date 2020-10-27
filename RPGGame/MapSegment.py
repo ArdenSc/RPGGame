@@ -1,9 +1,12 @@
-from typing import List, Union, overload
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, overload
+
+if TYPE_CHECKING:
+    from typing import List, Union
 
 
 class MapSegment:
-    _map: List[List[str]]
-
     def __init__(self, map: List[List[str]]):
         self._map = map
         self.width = len(max(map, key=len))

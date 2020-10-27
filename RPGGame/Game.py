@@ -1,16 +1,24 @@
 from __future__ import annotations
-from copy import deepcopy
 
+from copy import deepcopy
 from os import system
 from sys import platform
-from typing import Any, List, overload
+from typing import TYPE_CHECKING, overload
+from random import choice
 
-from typing_extensions import Literal
+from RPGGame.GameState import Vector
+from RPGGame.Item import Weapon
 
-from RPGGame.abstract.AbstractBehaviorHandler import AbstractBehaviorHandler
-from RPGGame.abstract.AbstractMenu import AbstractMenu
-from RPGGame.GameState import GameState, Vector
-from RPGGame.MapSegment import MapSegment
+if TYPE_CHECKING:
+    from typing import Any, List
+
+    from typing_extensions import Literal
+
+    from RPGGame.abstract.AbstractBehaviorHandler import \
+        AbstractBehaviorHandler
+    from RPGGame.abstract.AbstractGameState import AbstractGameState
+    from RPGGame.abstract.AbstractMenu import AbstractMenu
+    from RPGGame.MapSegment import MapSegment
 
 
 class StopGame(Exception):
@@ -38,6 +46,9 @@ def _invalid_register_type():
 
 
 def _invalid_gameplay_state():
+    """Internal function to be used as a default value for the
+    state_switch in the Game class.
+    """
     raise AttributeError("Invalid gameplay state.")
 
 
@@ -46,11 +57,13 @@ class Game:
 
     Requires at least maps and a menu, add them using the register method.
     """
-    _state: GameState
+    def __init__(self, state: AbstractGameState) -> None:
+        """Creates an instance of the game framework.
 
-    def __init__(self) -> None:
-        """Creates an instance of the game framework"""
-        self._state = GameState()
+        Args:
+            state: An instance of a class that inherits AbstractGameState.
+        """
+        self._state = state
         self._register_switch = {
             "menu": self._register_menu,
             "maps": self._register_maps,
@@ -65,17 +78,19 @@ class Game:
         self._state_switch = {
             "start": self._mainmenu,
             "navigate": self._navigate,
-            "fight": lambda: None,
+            "fight": self._fight,
             "inventory": lambda: None,
         }
 
     def _register_menu(self, menu: AbstractMenu) -> None:
         """Internal method for registering a menu"""
-        self._state.menu = menu
+        self._menu = menu
 
-    def _register_maps(self, maps: List[List[MapSegment]]) -> None:
+    def _register_maps(self, maps: List[List[MapSegment]],
+                       map_names: List[List[str]]) -> None:
         """Internal method for registering maps"""
         self._state.maps = maps
+        self._state.map_names = map_names
 
     def _register_behaviors(self, handler: AbstractBehaviorHandler) -> None:
         self._behaviors = handler
@@ -91,8 +106,8 @@ class Game:
         ...
 
     @overload
-    def register(self, type: Literal['maps'],
-                 maps: List[List[MapSegment]]) -> None:
+    def register(self, type: Literal['maps'], maps: List[List[MapSegment]],
+                 map_names: List[List[str]]) -> None:
         """Registers maps to the game.
 
         Args:
@@ -113,18 +128,71 @@ class Game:
         self._register_switch.get(type, _invalid_register_type)(*args)
 
     def _navigate(self) -> None:
-        dir = self._state.menu.navigate(
-            self._state.get_map(*self._state.map_pos), self._state.pos)
+        dir = self._menu.navigate(self._state)
         if dir == 4:
             raise StopGame
         self._move(self._dir_switch[dir])
         self._behaviors.on_move_callback(self._state)
 
     def _mainmenu(self) -> None:
-        result = self._state.menu.mainmenu()
+        result = self._menu.mainmenu()
         if result == 1:
             raise StopGame
-        self._state.gameplay_state = "navigate"
+        self._state.gameplay_state = 'navigate'
+
+    def _end_fight(self) -> None:
+        self._state.fight_state = None
+        self._state.gameplay_state = 'navigate'
+
+    def _fight(self) -> None:
+        if not self._state.fight_state:
+            self._state.fight_state = {
+                'menu': 'action',
+                'run_failed': False,
+                'amt_options': 3,
+            }
+        option = self._menu.fight(self._state)
+        if self._state.fight_state['menu'] == 'action':
+            if option == 0:
+                self._state.fight_state['menu'] = 'attack'
+                self._state.fight_state['amt_options'] = sum(
+                    1 for x in self._state.player.inventory
+                    if isinstance(x, Weapon)) + 1
+            elif option == 1:
+                self._state.fight_state['menu'] = 'heal'
+            elif choice((True, False)):
+                self._end_fight()
+            else:
+                self._state.fight_state['run_failed'] = True
+                self._state.fight_state['amt_options'] = 2
+        elif self._state.fight_state['menu'] == 'attack':
+            if option == 0:
+                self._state.fight_state['menu'] = 'action'
+                self._state.fight_state[
+                    'amt_options'] = 2 if self._state.fight_state[
+                        'run_failed'] else 3
+            else:
+                option -= 1
+                weapon = [
+                    x for x in self._state.player.inventory
+                    if isinstance(x, Weapon)
+                ][option]
+                damage_in = self._state.target.damage
+                self._state.player.health -= damage_in
+                damage_out = weapon.damage
+                self._state.target.health -= damage_out
+                self._state.message = f"""\
+You did {damage_out} dmg to the \
+{self._state.target.name}, it did {damage_in} to you.\
+"""
+                if self._state.player.health <= 0:
+                    raise StopGame
+                if self._state.target.health <= 0:
+                    self._state.pending_messages.append(
+                        f'You killed the {self._state.target.name}!')
+                    self._state.pending_message_timeouts.append(4)
+                    self._state.fight_state = None
+                    self._state.gameplay_state = 'navigate'
 
     def _move(self, movement: Vector):
         old_pos = deepcopy(self._state.pos)
@@ -165,7 +233,7 @@ class Game:
         """Starts the game.
         All requirements must have been registered before calling this method.
         """
-        if not hasattr(self._state, 'menu'):
+        if not hasattr(self, '_menu'):
             raise AttributeError("A Menu is required to run the game.")
         if not hasattr(self._state, 'maps'):
             raise AttributeError("Maps are required to run the game.")

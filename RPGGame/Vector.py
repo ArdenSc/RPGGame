@@ -18,8 +18,16 @@ class Vector:
     def West():
         return Vector(-1, 0)
 
-    def __init__(self, *args: int):
-        self.values = list(args)
+    @property
+    def x(self) -> int:
+        return self.values[0]
+
+    @property
+    def y(self) -> int:
+        return self.values[1]
+
+    def __init__(self, x: int, y: int):
+        self.values = [x, y]
 
     def __str__(self) -> str:
         return "(" + ', '.join(map(str, self.values)) + ")"
@@ -59,3 +67,13 @@ class Vector:
             raise ValueError("Vectors are not the same length.")
         self.values = [x - y for x, y in zip(self, other)]
         return self
+
+
+class RectVector:
+    def __init__(self, x1: int, y1: int, x2: int, y2: int) -> None:
+        self.values = Vector(x1, y1), Vector(x2, y2)
+
+    def contains(self, other: Vector) -> bool:
+        return (self.values[0].x <= other.x and self.values[0].y <= other.y
+                and self.values[1].x >= other.x
+                and self.values[1].y >= other.y)

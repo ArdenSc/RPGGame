@@ -54,3 +54,8 @@ for ir, row in enumerate(_maps):
     maps.append([])
     for ic, column in enumerate(row):
         maps[ir].append(MapSegment(column))
+
+map_names = [
+    ['The village', 'test'],
+    ['test', 'test'],
+]

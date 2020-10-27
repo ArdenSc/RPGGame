@@ -21,9 +21,8 @@ class _GetKeyPressWindows:
 
     def __call__(self):
         ch = b''
-        while 1:
+        while not ch:
             ch = self.getch()
-            if ch: break
         try:
             return bytes.decode(ch)
         except:
@@ -31,7 +30,8 @@ class _GetKeyPressWindows:
                 return '\x03'
             elif ch == b'\x04':
                 return '\x04'
-            return None
+            else:
+                raise AttributeError('Error getting keypress from Windows')
 
 
 class _GetKeyPressUnix:

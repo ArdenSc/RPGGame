@@ -1,9 +1,14 @@
-from abc import ABC, ABCMeta, abstractmethod
-from typing import Callable, List, Tuple, Union
+from __future__ import annotations
 
-SizeData = Tuple[int, int]
-StaticWidgetData = Tuple[List[str], SizeData]
-DynamicWidgetData = Tuple[Callable[[int, int], StaticWidgetData], SizeData]
+from abc import ABC, ABCMeta, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Callable, List, Tuple, Union
+    SizeData = Tuple[int, int]
+    StaticWidgetData = Tuple[List[str], SizeData]
+    DynamicWidgetData = Tuple[Callable[[int, int], StaticWidgetData], SizeData]
+
 
 
 class AbstractWidget(ABC):

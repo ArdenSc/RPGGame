@@ -1,6 +1,11 @@
-from typing import List
+from __future__ import annotations
 
-from RPGGame.Item import Item
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Iterable, List
+
+    from RPGGame.Item import Item
 
 
 class Inventory:
@@ -28,3 +33,6 @@ class Inventory:
 
     def append(self, new: Item):
         self._data.append(new)
+
+    def extend(self, new: Iterable[Item]):
+        self._data.extend(new)
