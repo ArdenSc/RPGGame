@@ -1,4 +1,4 @@
-from math import isqrt
+from math import sqrt
 from os import listdir, path
 from re import search
 from typing import List, TypeVar
@@ -37,7 +37,7 @@ def uniform_line_lengths(list: List[List[str]],
 
 _maps = list(filter(lambda x: search("^\\d{2}.txt$", x), files))
 
-mapGridSize = isqrt(len(_maps))
+mapGridSize = int(sqrt(len(_maps)))
 if len(_maps) != mapGridSize**2:
     raise Exception("Amount of map files in maps must be a perfect square.")
 
