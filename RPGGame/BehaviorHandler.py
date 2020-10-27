@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 
 class Behavior(NamedTuple):
+    """Outlines a behavior to be triggered at t_pos location."""
     t_pos: Union[Vector, RectVector]
     t_map: Vector
     handler: Callable[..., None]
@@ -23,7 +24,9 @@ class Behavior(NamedTuple):
 
 
 class BehaviorHandler(AbstractBehaviorHandler):
+    """Dispatches all game behaviors triggered by the player position."""
     def __init__(self):
+        """Sets the default behaviors for the game."""
         self._behaviors = [
             Behavior(
                 RectVector(6, 1, 9, 1),
@@ -149,11 +152,13 @@ my house. Why don't you go get it.""", 0
 
     def _add_to_inventory(self, state: AbstractGameState,
                           *items: Item) -> None:
+        """Adds an item to the player's inventory."""
         state.player.inventory.extend(items)
         self._display_message(
             state, 'You picked up ' + ', '.join(map(str, items)) + '.', 4)
 
     def _start_fight(self, state: AbstractGameState, enemy: Enemy) -> None:
+        """Adjusts the game state to trigger a fight against enemy."""
         if sum(1 for x in state.player.inventory
                if isinstance(x, Weapon)) == 0:
             state.pending_messages.append(
@@ -165,6 +170,8 @@ my house. Why don't you go get it.""", 0
 
     def _unlock_door(self, state: AbstractGameState, door: Vector, map: Vector,
                      key: Item, reject: str):
+        """Unlocks a door at the specified location if the key is in the
+        player's inventory."""
         if any(key == x for x in state.player.inventory):
             state.get_map(*map).set(door.x, door.y, ' ')
         else:
@@ -172,15 +179,21 @@ my house. Why don't you go get it.""", 0
 
     @overload
     def _display_message(self, state: AbstractGameState, message: str):
+        """Displays a normal message"""
         ...
 
     @overload
     def _display_message(self, state: AbstractGameState, message: str,
                          message_timeout: int):
+        """Displays an important message for message_timeout movements."""
         ...
 
     def _display_message(self, state: AbstractGameState, message: str,
                          *args: int) -> None:
+        """Base method for displaying a message to the player.
+
+        See overloads for specifics.
+        """
         if len(args) == 0:
             if state.message_timeout == 0:
                 state.message = message
@@ -191,6 +204,7 @@ my house. Why don't you go get it.""", 0
             raise AttributeError("Incorrect amount of args.")
 
     def on_move_callback(self, state: AbstractGameState) -> None:
+        """To be called when a movement is made"""
         for behavior in reversed(self._behaviors):
             if behavior.type == 'fight' and behavior.data[0].health <= 0:
                 self._behaviors.remove(behavior)

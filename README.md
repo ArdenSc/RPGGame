@@ -1,4 +1,4 @@
-# RPGGame
+# Hero of the Village
 
 ![GitHub top language](https://img.shields.io/github/languages/top/ArdenSinclair/RPGGame?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/ArdenSinclair/RPGGame?style=flat-square)
@@ -6,7 +6,10 @@
 
 A terminal adventure roleplay game.
 
-Navigate a confusing maze while fighting enemies, gathering loot, and unlocking secret rooms.
+Navigate the village and gather items from the locals.
+Fight off the monsters in the King dungeon to win.
+
+You'll love this game if you enjoy RPGs and will especially enjoy the unique WASD controls, just like a graphical game.
 
 ## Installation
 
@@ -23,6 +26,19 @@ pip install --user .
 ```cmd
 python -m RPGGame
 ```
+
+Controls:
+
+- WASD for movement
+- Q to quit
+
+## Completion
+
+- [x] Player movement
+- [x] Item pickup
+- [x] Boss fights
+- [ ] Item upgrades (future)
+- [ ] Shops (future)
 
 ## License
 

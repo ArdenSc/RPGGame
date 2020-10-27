@@ -11,6 +11,9 @@ if TYPE_CHECKING:
 
 
 class Enemy():
+    """Represents an enemy to be fought by the player."""
+
+    # Static methods are premade initializers for common enemies.
     @staticmethod
     def Zombie() -> Enemy:
         return Enemy("Zombie", 50, (10, 20), [Heal.Bandage()])
@@ -40,8 +43,14 @@ class Enemy():
                  health: int,
                  damage_range: Tuple[int, int],
                  drops: List[Item] = []) -> None:
-        """
-        docstring
+        """Creates an enemy instance with the specified attributes.
+
+        Args:
+            name: Name of the enemy.
+            health: Enemy's max health.
+            damage_range: A 2 item tuple representing the minimum and maximum
+                          damage the enemy can do.
+            drops: A list of items the enemy drops when killed.
         """
         self.name = name
         self.health = health
@@ -50,12 +59,13 @@ class Enemy():
 
     @property
     def damage(self) -> int:
+        """Returns a random amount of damage within the enemy's
+        minimum and maximum damage."""
         return randint(*self.damage_range)
 
     def __str__(self) -> str:
-        """
-        docstring
-        """
+        """String representation of the enemy to provide
+        the player with information."""
         return f"""\
 {self.name}:
 - Health: {self.health}

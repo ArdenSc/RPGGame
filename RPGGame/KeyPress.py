@@ -1,3 +1,7 @@
+# Implementation of a cross platform keyboard listener,
+# adapted to the game.
+# Credits to someone on StackOverflow, I can't find the post.
+
 from RPGGame.Game import StopGame
 
 

@@ -4,19 +4,28 @@ Includes all important changes to the RPG adventure game.
 
 ## [Unreleased]
 
+## [1.0.0] - 2020-10-27
+
+### Added
+
+- A fighting system.
+- Item pickups.
+- Signs with text.
+- Comments for all functions, classes, and methods.
+
 ## [0.0.4] - Prerelease - 2020-10-26
 
 ### Added
 
-- Compatibility with Python 3.7
-- Compatibility with Unix
-- Multi-section map with collisions
-- Widget-based text display
+- Compatibility with Python 3.7.
+- Compatibility with Unix.
+- Multi-section map with collisions.
+- Widget-based text display.
 
 ### Changed
 
-- Automatic console resizing
-- Miscellaneous refactoring
+- Automatic console resizing.
+- Miscellaneous refactoring.
 
 ## [0.0.3] - Prerelease - 2020-10-06
 
@@ -48,7 +57,8 @@ Includes all important changes to the RPG adventure game.
 - Changelog file for all important modifications.
 - Python setup file for module info and installation.
 
-[unreleased]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.4...HEAD
+[unreleased]: https://github.com/ArdenSinclair/RPGGame/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.4...v1.0.0
 [0.0.4]: https://github.com/ArdenSinclair/RPGGame/compare/v.0.0.3...v0.0.4
 [0.0.3]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.2...v.0.0.3
 [0.0.2]: https://github.com/ArdenSinclair/RPGGame/compare/v0.0.1...v0.0.2

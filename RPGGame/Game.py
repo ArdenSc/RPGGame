@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, overload
 
 from RPGGame.Exceptions import *
 from RPGGame.GameState import Vector
-from RPGGame.Item import Armor, Heal, Weapon
+from RPGGame.Item import Heal, Weapon
 
 if TYPE_CHECKING:
     from typing import Any, List
@@ -86,11 +86,15 @@ class Game:
     def _register_maps(self, maps: List[List[MapSegment]],
                        map_names: List[List[str]]) -> None:
         """Internal method for registering maps"""
-        self._state.maps = maps
-        self._state.map_names = map_names
+        self._starting_maps = maps
+        self._starting_map_names = map_names
+        self._state.maps = deepcopy(self._starting_maps)
+        self._state.map_names = deepcopy(self._starting_map_names)
 
     def _register_behaviors(self, handler: AbstractBehaviorHandler) -> None:
-        self._behaviors = handler
+        """Internal method for registering a behavior handler."""
+        self._starting_behaviors = handler
+        self._behaviors = deepcopy(self._starting_behaviors)
 
     @overload
     def register(self, type: Literal['menu'], menu: AbstractMenu) -> None:
@@ -116,28 +120,39 @@ class Game:
     @overload
     def register(self, type: Literal['behaviors'],
                  handler: AbstractBehaviorHandler) -> None:
+        """Registers a behavior handler to the game.
+
+        Args:
+            type: Must be a string of value 'behaviors'.
+            handler: A subclass of AbstractBehaviorHandler.
+        """
         ...
 
     def register(self, type: str, *args: Any) -> None:
         """Base method for registering maps or a handler.
+
         See overloads for details specific to each registerable item.
         """
         self._register_switch.get(type, _invalid_register_type)(*args)
 
     def _navigate(self) -> None:
+        """Internal method for calling the navigation menu."""
         dir = self._menu.navigate(self._state)
         self._move(self._dir_switch[dir])
         self._behaviors.on_move_callback(self._state)
 
     def _mainmenu(self) -> None:
+        """Internal method for calling the title menu."""
         self._menu.mainmenu()
         self._state.gameplay_state = 'navigate'
 
     def _end_fight(self) -> None:
+        """Internal method for ending an active fight."""
         self._state.fight_state = None
         self._state.gameplay_state = 'navigate'
 
     def _fight(self) -> None:
+        """Internal method for handling an active fight."""
         if not self._state.fight_state:
             self._state.fight_state = {
                 'menu': 'action',
@@ -177,9 +192,7 @@ class Game:
                     if isinstance(x, Weapon)
                 ][option]
                 damage_in = self._state.target.damage
-                damage_in -= sum(x.defense
-                                 for x in self._state.player.inventory
-                                 if isinstance(x, Armor))
+                damage_in -= self._state.player.armor
                 self._state.player.health -= damage_in
                 damage_out = weapon.damage
                 self._state.target.health -= damage_out
@@ -221,6 +234,7 @@ You did {damage_out} dmg to the \
                     if isinstance(x, Heal)) + 1
 
     def _move(self, movement: Vector):
+        """Internal method for moving the player."""
         old_pos = deepcopy(self._state.pos)
         self._state.pos += movement
         x, y = self._state.pos
@@ -255,14 +269,25 @@ You did {damage_out} dmg to the \
                                       '▙', '▟', '▐'):
             self._state.pos = old_pos
 
+    def _reset(self) -> None:
+        """Internal method for resetting the game state for replayability."""
+        self._state = deepcopy(self._starting_state)
+        self._state.maps = deepcopy(self._starting_maps)
+        self._state.map_names = deepcopy(self._starting_map_names)
+        self._behaviors = deepcopy(self._starting_behaviors)
+
+
     def run(self) -> None:
         """Starts the game.
+
         All requirements must have been registered before calling this method.
         """
         if not hasattr(self, '_menu'):
             raise AttributeError("A Menu is required to run the game.")
         if not hasattr(self._state, 'maps'):
             raise AttributeError("Maps are required to run the game.")
+        if not hasattr(self, '_behaviors'):
+            raise AttributeError("Behaviors are required to run the game.")
         _terminal_resize(135, 35)
         while True:
             try:
@@ -273,11 +298,6 @@ You did {damage_out} dmg to the \
                     break
                 elif isinstance(e, WinGame):
                     self._menu.winmenu()
-                    maps_copy = deepcopy(self._state.maps)
-                    self._state = deepcopy(self._starting_state)
-                    self._state.maps = maps_copy
                 else:
                     self._menu.losemenu()
-                    maps_copy = deepcopy(self._state.maps)
-                    self._state = deepcopy(self._starting_state)
-                    self._state.maps = maps_copy
+                self._reset()

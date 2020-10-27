@@ -24,6 +24,10 @@ class FightState(TypedDict):
 
 
 class AbstractGameState(ABC):
+    """Stores all information about an active game session.
+
+    Must be extended by an actual implementation.
+    """
     maps: List[List[MapSegment]]
     map_names: List[List[str]]
     target: Enemy
@@ -39,8 +43,10 @@ class AbstractGameState(ABC):
 
     @abstractmethod
     def get_map(self, x: int, y: int) -> MapSegment:
+        """Returns the map at the specified coordinates."""
         ...
 
     @abstractmethod
     def get_map_name(self, x: int, y: int) -> str:
+        """Returns the map name at the specified coordinates."""
         ...

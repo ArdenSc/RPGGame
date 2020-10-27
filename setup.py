@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setup(name="RPGGame",
-      version="0.0.3",
+setup(name="Hero of the Village",
+      version="1.0.0",
       author="Arden Sinclair",
       description="A terminal roleplay game",
       long_description=long_description,

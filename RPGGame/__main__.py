@@ -1,8 +1,7 @@
 # Arden Sinclair
-# Oct. 06, 2020
+# Oct. 27, 2020
 # CS30 P1Q1
-# An interactive adventure game.
-# Currently only example code is implemented.
+# Hero of the Village - An interactive adventure game.
 
 from RPGGame.BehaviorHandler import BehaviorHandler
 from RPGGame.Game import Game

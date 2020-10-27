@@ -10,7 +10,7 @@ from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.abstract.AbstractWidget import *
 from RPGGame.Item import Weapon, Heal
 from RPGGame.KeyPress import GetKeyPress
-from RPGGame.util import clear
+from RPGGame.Util import clear
 
 if TYPE_CHECKING:
     from typing import List, Tuple
@@ -256,7 +256,9 @@ class Menu(AbstractMenu):
         self.middlePadding = middlePadding
         self.getKeyPress = GetKeyPress()
 
-    def display(self, width: int, height: int, widget: AbstractWidget) -> None:
+    def _display(self, width: int, height: int,
+                 widget: AbstractWidget) -> None:
+        """Internal method for displaying a widget."""
         clear()
         if isinstance(widget, DynamicWidget):
             builder = widget.build()
@@ -268,22 +270,23 @@ class Menu(AbstractMenu):
         print('\n'.join(build[0]))
 
     def mainmenu(self) -> int:
+        """Displays the main title screen."""
         size = get_terminal_size()
         width, height = size.columns, size.lines
 
         # yapf: disable
-        self.display(
+        self._display(
             width,
             height,
             Scaffold(
                 Center(
                     Text(r"""
- _____  _____   _____
-|  __ \|  __ \ / ____|
-| |__) | |__) | |  __  __ _ _ __ ___   ___
-|  _  /|  ___/| | |_ |/ _` | '_ ` _ \ / _ \
-| | \ \| |    | |__| | (_| | | | | | |  __/
-|_|  \_\_|     \_____|\__,_|_| |_| |_|\___|
+  _    _                 ____ _________      __
+ | |  | |               / __ \__   __\ \    / /
+ | |__| | ___ _ __ ___ | |  | | | |   \ \  / /
+ |  __  |/ _ \ '__/ _ \| |  | | | |    \ \/ /
+ | |  | |  __/ | | (_) | |__| | | |     \  /
+ |_|  |_|\___|_|  \___/ \____/  |_|      \/
 
 """),
                 ),
@@ -300,16 +303,17 @@ class Menu(AbstractMenu):
             return 0
 
     def winmenu(self) -> int:
-            size = get_terminal_size()
-            width, height = size.columns, size.lines
+        """Displays the win screen."""
+        size = get_terminal_size()
+        width, height = size.columns, size.lines
 
-            # yapf: disable
-            self.display(
-                width,
-                height,
-                Scaffold(
-                    Center(
-                        Text(r"""
+        # yapf: disable
+        self._display(
+            width,
+            height,
+            Scaffold(
+                Center(
+                    Text(r"""
  __     __          __          ___       _
  \ \   / /          \ \        / (_)     | |
   \ \_/ /__  _   _   \ \  /\  / / _ _ __ | |
@@ -318,30 +322,31 @@ class Menu(AbstractMenu):
     |_|\___/ \__,_|     \/  \/   |_|_| |_(_)
 
 """),
-                    ),
-                    Center(
-                        direction='horizontal',
-                        child=Text('Press any key to play again. Q to Quit'),
-                    ),
                 ),
-            )
-            # yapf: enable
+                Center(
+                    direction='horizontal',
+                    child=Text('Press any key to play again. Q to Quit'),
+                ),
+            ),
+        )
+        # yapf: enable
 
-            while True:
-                self.getKeyPress()
-                return 0
+        while True:
+            self.getKeyPress()
+            return 0
 
     def losemenu(self) -> int:
-            size = get_terminal_size()
-            width, height = size.columns, size.lines
+        """Displays the loss screen."""
+        size = get_terminal_size()
+        width, height = size.columns, size.lines
 
-            # yapf: disable
-            self.display(
-                width,
-                height,
-                Scaffold(
-                    Center(
-                        Text(r"""
+        # yapf: disable
+        self._display(
+            width,
+            height,
+            Scaffold(
+                Center(
+                    Text(r"""
  __     __           _                    _
  \ \   / /          | |                  | |
   \ \_/ /__  _   _  | |     ___  ___  ___| |
@@ -350,18 +355,18 @@ class Menu(AbstractMenu):
     |_|\___/ \__,_| |______\___/|___/\___(_)
 
 """),
-                    ),
-                    Center(
-                        direction='horizontal',
-                        child=Text('Press any key to play again. Q to Quit'),
-                    ),
                 ),
-            )
-            # yapf: enable
+                Center(
+                    direction='horizontal',
+                    child=Text('Press any key to play again. Q to Quit'),
+                ),
+            ),
+        )
+        # yapf: enable
 
-            while True:
-                self.getKeyPress()
-                return 0
+        while True:
+            self.getKeyPress()
+            return 0
 
     def navigate(self, state: AbstractGameState) -> int:
         """Waits for a navigational key to be pressed.
@@ -384,12 +389,12 @@ class Menu(AbstractMenu):
             state.message_timeout = state.pending_message_timeouts.pop(0)
 
         # yapf: disable
-        self.display(
+        self._display(
             width, height,
             Scaffold(
                 Spacer(),
                 Center(
-                    Text(map_name + '\n' + str(state.pos)),
+                    Text(map_name),
                 ),
                 Stack(
                     Text(str(state.player.inventory_info())),
@@ -424,6 +429,12 @@ class Menu(AbstractMenu):
                 return 3
 
     def fight(self, state: AbstractGameState) -> int:
+        """Waits for a fight option selection to be pressed.
+
+        Returns:
+            An integer from 0 to the value of state.fight_state['amt_options']
+            representing the option selected on the menu.
+        """
         size = get_terminal_size()
         width, height = size.columns, size.lines
 
@@ -447,7 +458,7 @@ class Menu(AbstractMenu):
             message = ''
 
         # yapf: disable
-        self.display(
+        self._display(
             width, height,
             Scaffold(
                 Spacer(),

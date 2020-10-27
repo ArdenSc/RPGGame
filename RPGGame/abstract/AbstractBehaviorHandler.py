@@ -8,6 +8,11 @@ if TYPE_CHECKING:
 
 
 class AbstractBehaviorHandler(ABC):
+    """Dispatches all game behaviors triggered by the player position.
+
+    Must be extended by an actual implementation.
+    """
     @abstractmethod
     def on_move_callback(self, state: AbstractGameState) -> None:
+        """To be called when a movement is made"""
         ...

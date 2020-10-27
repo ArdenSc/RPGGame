@@ -9,15 +9,19 @@ files = listdir(path.dirname(__file__))
 
 
 def strip_newlines(x: List[str]):
+    """Removes newlines from the input."""
     return [y.rstrip() for y in x]
 
 
 def name_to_file(x: str):
+    """Returns a list of lines from the specified filename."""
     with open(path.join(path.dirname(__file__), x), encoding='utf-8') as file:
         return file.readlines()
 
 
 def strings_to_lists(x: List[str]) -> List[List[str]]:
+    """Converts a list of strings to a nested list of
+    single character strings."""
     return list(map(lambda y: [z for z in y], x))
 
 
@@ -25,12 +29,24 @@ T = TypeVar('T')
 
 
 def rearranage_list(list: List[T], columns: int) -> List[List[T]]:
+    """Converts a list into a 2D nested list.
+
+    Args:
+        list: Any list.
+        columns: The width of the requested 2D list.
+    """
     return [list[i:i + columns] for i in range(0, len(list), columns)]
 
 
 def uniform_line_lengths(list: List[List[str]],
-                         columns: int) -> List[List[str]]:
-    return [x + [' '] * (columns - len(x)) for x in list]
+                         length: int) -> List[List[str]]:
+    """Extends each line in a list of character lists.
+
+    Args:
+        list: List of character lists.
+        length: The length to be extended to.
+    """
+    return [x + [' '] * (length - len(x)) for x in list]
 
 
 # Maps
@@ -56,6 +72,6 @@ for ir, row in enumerate(_maps):
         maps[ir].append(MapSegment(column))
 
 map_names = [
-    ['The village', 'test'],
-    ['test', 'test'],
+    ['The village', 'The Arena'],
+    ['Open Field', 'Rural village'],
 ]
