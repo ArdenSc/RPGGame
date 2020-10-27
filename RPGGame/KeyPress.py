@@ -1,3 +1,6 @@
+from RPGGame.Game import StopGame
+
+
 class GetKeyPress:
     def __init__(self):
         try:
@@ -11,6 +14,8 @@ class GetKeyPress:
             raise KeyboardInterrupt
         elif ch == '\x04':
             raise EOFError
+        elif ch == 'q':
+            raise StopGame
         return ch
 
 

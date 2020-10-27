@@ -14,12 +14,14 @@ if TYPE_CHECKING:
     from RPGGame.Vector import Vector
     from typing_extensions import Literal
 
-    GameplayState = Literal['start', 'navigate', 'fight', 'inventory']
+    GameplayState = Literal['start', 'navigate', 'fight']
+
 
 class FightState(TypedDict):
     menu: Literal['action', 'attack', 'heal']
     run_failed: bool
     amt_options: int
+
 
 class AbstractGameState(ABC):
     maps: List[List[MapSegment]]

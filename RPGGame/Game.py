@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from copy import deepcopy
 from os import system
+from random import choice
 from sys import platform
 from typing import TYPE_CHECKING, overload
-from random import choice
 
+from RPGGame.Exceptions import *
 from RPGGame.GameState import Vector
-from RPGGame.Item import Weapon
+from RPGGame.Item import Armor, Heal, Weapon
 
 if TYPE_CHECKING:
     from typing import Any, List
@@ -19,10 +20,6 @@ if TYPE_CHECKING:
     from RPGGame.abstract.AbstractGameState import AbstractGameState
     from RPGGame.abstract.AbstractMenu import AbstractMenu
     from RPGGame.MapSegment import MapSegment
-
-
-class StopGame(Exception):
-    ...
 
 
 def _terminal_resize(columns: int, lines: int):
@@ -63,7 +60,8 @@ class Game:
         Args:
             state: An instance of a class that inherits AbstractGameState.
         """
-        self._state = state
+        self._starting_state = state
+        self._state = deepcopy(self._starting_state)
         self._register_switch = {
             "menu": self._register_menu,
             "maps": self._register_maps,
@@ -79,7 +77,6 @@ class Game:
             "start": self._mainmenu,
             "navigate": self._navigate,
             "fight": self._fight,
-            "inventory": lambda: None,
         }
 
     def _register_menu(self, menu: AbstractMenu) -> None:
@@ -129,15 +126,11 @@ class Game:
 
     def _navigate(self) -> None:
         dir = self._menu.navigate(self._state)
-        if dir == 4:
-            raise StopGame
         self._move(self._dir_switch[dir])
         self._behaviors.on_move_callback(self._state)
 
     def _mainmenu(self) -> None:
-        result = self._menu.mainmenu()
-        if result == 1:
-            raise StopGame
+        self._menu.mainmenu()
         self._state.gameplay_state = 'navigate'
 
     def _end_fight(self) -> None:
@@ -160,11 +153,17 @@ class Game:
                     if isinstance(x, Weapon)) + 1
             elif option == 1:
                 self._state.fight_state['menu'] = 'heal'
+                self._state.fight_state['amt_options'] = sum(
+                    1 for x in self._state.player.inventory
+                    if isinstance(x, Heal)) + 1
             elif choice((True, False)):
                 self._end_fight()
+                self._state.pending_messages.append('You got away.')
+                self._state.pending_message_timeouts.append(4)
             else:
                 self._state.fight_state['run_failed'] = True
                 self._state.fight_state['amt_options'] = 2
+                self._state.message = "You couldn't get away."
         elif self._state.fight_state['menu'] == 'attack':
             if option == 0:
                 self._state.fight_state['menu'] = 'action'
@@ -178,6 +177,9 @@ class Game:
                     if isinstance(x, Weapon)
                 ][option]
                 damage_in = self._state.target.damage
+                damage_in -= sum(x.defense
+                                 for x in self._state.player.inventory
+                                 if isinstance(x, Armor))
                 self._state.player.health -= damage_in
                 damage_out = weapon.damage
                 self._state.target.health -= damage_out
@@ -186,13 +188,37 @@ You did {damage_out} dmg to the \
 {self._state.target.name}, it did {damage_in} to you.\
 """
                 if self._state.player.health <= 0:
-                    raise StopGame
+                    raise LoseGame
                 if self._state.target.health <= 0:
+                    self._state.player.inventory.extend(
+                        self._state.target.drops)
                     self._state.pending_messages.append(
-                        f'You killed the {self._state.target.name}!')
+                        f"You killed the {self._state.target.name}! " +
+                        'It dropped ' +
+                        (', '.join(x.name
+                                   for x in self._state.target.drops) if self.
+                         _state.target.drops else 'nothing') + '.')
                     self._state.pending_message_timeouts.append(4)
                     self._state.fight_state = None
                     self._state.gameplay_state = 'navigate'
+        elif self._state.fight_state['menu'] == 'heal':
+            if option == 0:
+                self._state.fight_state['menu'] = 'action'
+                self._state.fight_state[
+                    'amt_options'] = 2 if self._state.fight_state[
+                        'run_failed'] else 3
+            else:
+                option -= 1
+                heal = [
+                    x for x in self._state.player.inventory
+                    if isinstance(x, Heal)
+                ][option]
+                self._state.player.health += heal.health
+                self._state.message = f"You restored {heal.health} health."
+                heal.used = True
+                self._state.fight_state['amt_options'] = sum(
+                    1 for x in self._state.player.inventory
+                    if isinstance(x, Heal)) + 1
 
     def _move(self, movement: Vector):
         old_pos = deepcopy(self._state.pos)
@@ -242,5 +268,16 @@ You did {damage_out} dmg to the \
             try:
                 self._state_switch.get(self._state.gameplay_state,
                                        _invalid_gameplay_state)()
-            except StopGame:
-                break
+            except (StopGame, WinGame, LoseGame) as e:
+                if isinstance(e, StopGame):
+                    break
+                elif isinstance(e, WinGame):
+                    self._menu.winmenu()
+                    maps_copy = deepcopy(self._state.maps)
+                    self._state = deepcopy(self._starting_state)
+                    self._state.maps = maps_copy
+                else:
+                    self._menu.losemenu()
+                    maps_copy = deepcopy(self._state.maps)
+                    self._state = deepcopy(self._starting_state)
+                    self._state.maps = maps_copy

@@ -5,13 +5,13 @@
 █               ▌ TRADER  ▐                           ▌ E ▌
 █                         ▐                            ▌ R ▌
 █               ▌         ▐                           ▀▀▀▀▀▀▀
-█               ▙▄▄▄▄▄▄▄▄▄▟                            Bridge
-█                                                      ▀▀▀▀▀▀▀▀
-█                  (B = BOSS THAT CAN BE FOUGHT)          ▌ R ▌
-█ WEAPON           (# = DIFFICULTY OF BOSS)                ▌ I ▌
-█ SMITH - UPGRADE WEAPONS                                   ▌ v ▌
+█               ▙▄▄▄▄▄▄▄▄▄▟                             Bridge
+█                                                       ▀▀▀▀▀▀▀
+█                                                         ▌ R ▌
+█ WEAPON                                                   ▌ I ▌
+█ SMITH                                                     ▌ v ▌
 █▀▀▀▀▀▀▀▀█                                                   ▌ E ▌
-█        █                                                    ▌ R ▌
+█ SMITH  █                                                    ▌ R ▌
 █                                                              ▌ - ▌▁▁▁▁▁▁▁▁▁▁▁▁
 █                                                               ▌ R  I  V  E  R
 █        █                                                      ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔

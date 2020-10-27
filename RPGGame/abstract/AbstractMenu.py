@@ -19,3 +19,11 @@ class AbstractMenu(ABC):
     @abstractmethod
     def fight(self, state: AbstractGameState) -> int:
         ...
+
+    @abstractmethod
+    def winmenu(self) -> int:
+        ...
+
+    @abstractmethod
+    def losemenu(self) -> int:
+        ...

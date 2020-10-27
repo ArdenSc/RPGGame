@@ -31,3 +31,6 @@ class MapSegment:
 
         else:
             raise AttributeError("Invalid amount of arguments")
+
+    def set(self, x: int, y: int, value: str) -> None:
+        self._map[y][x] = value

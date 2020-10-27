@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from RPGGame.abstract.AbstractMenu import AbstractMenu
 from RPGGame.abstract.AbstractWidget import *
-from RPGGame.Item import Weapon
+from RPGGame.Item import Weapon, Heal
 from RPGGame.KeyPress import GetKeyPress
 from RPGGame.util import clear
 
@@ -296,10 +296,71 @@ class Menu(AbstractMenu):
         # yapf: enable
 
         while True:
-            ch = self.getKeyPress()
-            if ch == 'q':
-                return 1
-            else:
+            self.getKeyPress()
+            return 0
+
+    def winmenu(self) -> int:
+            size = get_terminal_size()
+            width, height = size.columns, size.lines
+
+            # yapf: disable
+            self.display(
+                width,
+                height,
+                Scaffold(
+                    Center(
+                        Text(r"""
+ __     __          __          ___       _
+ \ \   / /          \ \        / (_)     | |
+  \ \_/ /__  _   _   \ \  /\  / / _ _ __ | |
+   \   / _ \| | | |   \ \/  \/ / | | '_ \| |
+    | | (_) | |_| |    \  /\  /  | | | | |_|
+    |_|\___/ \__,_|     \/  \/   |_|_| |_(_)
+
+"""),
+                    ),
+                    Center(
+                        direction='horizontal',
+                        child=Text('Press any key to play again. Q to Quit'),
+                    ),
+                ),
+            )
+            # yapf: enable
+
+            while True:
+                self.getKeyPress()
+                return 0
+
+    def losemenu(self) -> int:
+            size = get_terminal_size()
+            width, height = size.columns, size.lines
+
+            # yapf: disable
+            self.display(
+                width,
+                height,
+                Scaffold(
+                    Center(
+                        Text(r"""
+ __     __           _                    _
+ \ \   / /          | |                  | |
+  \ \_/ /__  _   _  | |     ___  ___  ___| |
+   \   / _ \| | | | | |    / _ \/ __|/ _ \ |
+    | | (_) | |_| | | |___| (_) \__ \  __/_|
+    |_|\___/ \__,_| |______\___/|___/\___(_)
+
+"""),
+                    ),
+                    Center(
+                        direction='horizontal',
+                        child=Text('Press any key to play again. Q to Quit'),
+                    ),
+                ),
+            )
+            # yapf: enable
+
+            while True:
+                self.getKeyPress()
                 return 0
 
     def navigate(self, state: AbstractGameState) -> int:
@@ -361,8 +422,6 @@ class Menu(AbstractMenu):
                 return 2
             elif ch == 'a':
                 return 3
-            elif ch == 'q':
-                return 4
 
     def fight(self, state: AbstractGameState) -> int:
         size = get_terminal_size()
@@ -378,8 +437,12 @@ class Menu(AbstractMenu):
         elif state.fight_state['menu'] == 'attack':
             message = '1. Go back\n' + '\n'.join(
                 f"{i + 2}. {x.name}"
-                for i, x in enumerate(state.player.inventory)
-                if isinstance(x, Weapon))
+                for i, x in enumerate(x for x in state.player.inventory
+                                      if isinstance(x, Weapon)))
+        elif state.fight_state['menu'] == 'heal':
+            message = '1. Go back\n' + '\n'.join(
+                f"{i + 2}. {x.name}" for i, x in enumerate(
+                    x for x in state.player.inventory if isinstance(x, Heal)))
         else:
             message = ''
 
@@ -387,6 +450,7 @@ class Menu(AbstractMenu):
         self.display(
             width, height,
             Scaffold(
+                Spacer(),
                 Stack(
                     Center(
                         direction='horizontal',
