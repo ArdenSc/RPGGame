@@ -208,6 +208,7 @@ my house. Why don't you go get it.""", 0
         for behavior in reversed(self._behaviors):
             if behavior.type == 'fight' and behavior.data[0].health <= 0:
                 self._behaviors.remove(behavior)
+                continue
             if (behavior.t_map == state.map_pos
                     and (behavior.t_pos == state.pos if isinstance(
                         behavior.t_pos, Vector) else behavior.t_pos.contains(
