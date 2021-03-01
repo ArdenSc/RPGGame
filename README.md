@@ -16,7 +16,7 @@ You'll love this game if you enjoy RPGs and will especially enjoy the unique WAS
 Clone the repository and install it with pip
 
 ```cmd
-git clone https://github.com/ArdenSinclair/RPGGame.git
+git clone https://github.com/ArdenSc/RPGGame.git
 cd RPGGame
 pip install --user .
 ```
